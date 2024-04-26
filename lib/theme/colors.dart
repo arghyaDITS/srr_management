@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Color kMainColor = const Color(0xffD80621);
+Color kMainColor = Color.fromARGB(255, 26, 45, 134);
 Color k2MainColor = const Color(0xffFFFFFF);
 Color kButtonColor = Colors.blueGrey;
 Color tealColor = Colors.tealAccent;
@@ -12,7 +12,7 @@ Color kBTextColor = Colors.white;
 Color kWhiteColor = Colors.white;
 Color kSubTextColor = Colors.grey;
 Color kBlackColor = Colors.black;
-Color kRedColor = const Color(0xffD80621);
+Color kRedColor = Color.fromARGB(255, 26, 45, 134);
 Color kGreyLColor = Colors.grey.shade200;
 Color kDarkColor = Colors.grey.shade900;
 Color kHighlightColor = Colors.grey.shade100;

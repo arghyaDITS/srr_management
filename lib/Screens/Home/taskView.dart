@@ -10,8 +10,8 @@ class TaskView extends StatefulWidget {
 class _TaskViewState extends State<TaskView> {
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(title: Text("TAsk"),),
+    return   Scaffold(
+     
       body: Column(children: [
         Text("mnjhgjhj")
       ],),

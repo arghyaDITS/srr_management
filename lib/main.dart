@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Carpool',
+      title: 'SRR MANAGEMENT',
       debugShowCheckedModeBanner: false,
       theme: Constants.lightTheme,
       darkTheme: Constants.darkTheme,

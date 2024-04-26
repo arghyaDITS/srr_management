@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:srr_management/Screens/Home/dashboard.dart';
 import 'package:srr_management/Screens/Home/profile.dart';
 import 'package:srr_management/Screens/Home/taskView.dart';
+import 'package:srr_management/Screens/task/totalTaskList.dart';
 import 'package:srr_management/theme/colors.dart';
 
 class Home extends StatefulWidget {
@@ -16,9 +17,8 @@ class _HomeState extends State<Home> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const DashboardView(),
+    const TotalTaskList(completed: '',),
     const ProfileView(),
-    const TaskView(),
-    
   ];
 
   void _onItemTapped(int index) {
@@ -47,40 +47,42 @@ class _HomeState extends State<Home> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        appBar: _selectedIndex == 0 ? AppBar(
-          backgroundColor: k2MainColor,
-          leading: GestureDetector(
-            onTap: (){
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
-            },
-            child: const Padding(
-              padding:  EdgeInsets.all(10.0),
-              child:  CircleAvatar(
-                radius: 10.0,
-                backgroundImage: AssetImage('images/img_blank_profile.png'),
+        appBar: _selectedIndex == 0
+            ? AppBar(
+                backgroundColor: k2MainColor,
+                leading: GestureDetector(
+                  onTap: () {
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                  },
+                  // child: const Padding(
+                  //     padding: EdgeInsets.all(10.0),
+                  //     child: CircleAvatar(
+                  //       radius: 10.0,
+                  //       backgroundImage:
+                  //           AssetImage('images/img_blank_profile.png'),
+                  //     )),
+                ),
+                centerTitle: true,
+                title: CircleAvatar(child: Image.asset('images/logo.jpg', height: 55),radius: 30,),
+                // title: Text('Astha Saloon'),
+                // actions: [
+                //   // if(ServiceManager.isAdmin != false)
+                //   IconButton(
+                //     onPressed: (){
+                //       // Navigator.push(context, MaterialPageRoute(
+                //       //     builder: (context) => AppointmentCalender()));
+                //     },
+                //     icon: const Icon(Icons.calendar_month_outlined),
+                //   ),
+                //   IconButton(
+                //     onPressed: (){
+                //    //   LocationService().fetchLocation();
+                //     },
+                //     icon: const Icon(Icons.refresh),
+                //   ),
+                // ],
               )
-            ),
-          ),
-          centerTitle: true,
-          title: Image.asset('images/logo.jpg', height: 55),
-          // title: Text('Astha Saloon'),
-          // actions: [
-          //   // if(ServiceManager.isAdmin != false)
-          //   IconButton(
-          //     onPressed: (){
-          //       // Navigator.push(context, MaterialPageRoute(
-          //       //     builder: (context) => AppointmentCalender()));
-          //     },
-          //     icon: const Icon(Icons.calendar_month_outlined),
-          //   ),
-          //   IconButton(
-          //     onPressed: (){
-          //    //   LocationService().fetchLocation();
-          //     },
-          //     icon: const Icon(Icons.refresh),
-          //   ),
-          // ],
-        ) : null,
+            : null,
         body: Center(
           child: _widgetOptions.elementAt(_selectedIndex),
         ),
@@ -97,7 +99,7 @@ class _HomeState extends State<Home> {
             //   activeIcon: Icon(Icons.home_repair_service),
             //   label: 'Category',
             // ),
-           
+
             BottomNavigationBarItem(
               icon: Icon(Icons.groups_outlined),
               activeIcon: Icon(Icons.groups),
