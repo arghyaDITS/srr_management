@@ -1,6 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:srr_management/components/util.dart';
+import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:http/http.dart' as http;
+import 'package:srr_management/services/serViceManager.dart';
 
 class LeaveApplicationScreen extends StatefulWidget {
+
+  int? leaveId;
+  LeaveApplicationScreen({super.key,  this.leaveId});
+
   @override
   _LeaveApplicationScreenState createState() => _LeaveApplicationScreenState();
 }
@@ -10,6 +20,39 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
   DateTime _fromDate = DateTime.now();
   DateTime _toDate = DateTime.now();
   int _numberOfDays = 1;
+  TextEditingController _leaveDescriptionController = TextEditingController();
+  bool isLoading = false;
+
+   @override
+  void initState() {
+    
+    super.initState();
+
+  }
+
+  applyLeave() async {
+    isLoading = true;
+    String url = APIData.applyLeave;
+    print(ServiceManager.userID);
+    print(url.toString());
+    var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
+      'user_id': ServiceManager.userID,
+      'leave_type': _leaveType,
+      'total_days': _numberOfDays.toString(),
+      'from_date': _fromDate.toString(),
+      'to_date': _toDate.toString(),
+      
+     
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      toastMessage(message: 'Request Submitted');
+      print(res.body);
+      var data = jsonDecode(res.body);
+      isLoading = false;
+    }
+    return 'Success';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +66,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextFormField(
+              controller: _leaveDescriptionController,
               decoration: const InputDecoration(
                 labelText: 'Leave Description',
               ),
@@ -122,12 +166,24 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
             ),
             const SizedBox(height: 32.0),
             Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add logic to submit leave application
-                },
-                child: const Text('Apply'),
-              ),
+              child: isLoading == false
+                  ? ElevatedButton(
+                      onPressed: () {
+                        if (_leaveDescriptionController.text.isEmpty ||
+                            _numberOfDays <= 0) {
+                          // Show error message or toast indicating required fields
+                          toastMessage(message: 'Please fill all fields');
+                          return; // Exit function if validation fails
+                        } else {
+                          applyLeave();
+                          Navigator.pop(context);
+                        }
+
+                        // Add logic to submit leave application
+                      },
+                      child: const Text('Apply'),
+                    )
+                  : LoadingIcon(),
             ),
           ],
         ),

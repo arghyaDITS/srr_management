@@ -10,6 +10,7 @@ import 'package:srr_management/Screens/task/planningTask.dart';
 import 'package:srr_management/Screens/task/reviewscreen.dart';
 import 'package:srr_management/Screens/task/taskList.dart';
 import 'package:srr_management/Screens/task/totalTaskList.dart';
+import 'package:srr_management/adminAction/addminTaskList.dart';
 import 'package:srr_management/theme/style.dart';
 
 class DashboardView extends StatefulWidget {
@@ -26,14 +27,14 @@ class _DashboardViewState extends State<DashboardView> {
       onTap: onPress,
       child: Container(
           decoration: BoxDecoration(
-          //shape: BoxShape.circle,
-          borderRadius: BorderRadius.circular(25),
-          color: Colors.blue,
-        ),
+            //shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(25),
+            color: Colors.blue,
+          ),
           padding: const EdgeInsets.all(8),
           width: width,
           height: height,
-           // Color of the square container
+          // Color of the square container
           child: Center(
             child: Container(
               width: 150, // Adjust the size as needed
@@ -247,6 +248,21 @@ class _DashboardViewState extends State<DashboardView> {
                       iconData: Icons.notes_outlined),
                   smallContainer(
                       color: const Color.fromARGB(255, 116, 156, 148),
+                      text: "Total Task",
+                      quantity: '1',
+                      height: 80.0,
+                      width: 80.0,
+                      fontsize: 12.0,
+                      isIcon: true,
+                      iconData: Icons.leave_bags_at_home,
+                      onPress: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const AdminTaskList()));
+                      }),
+                       smallContainer(
+                      color: const Color.fromARGB(255, 116, 156, 148),
                       text: "Leaves",
                       quantity: '1',
                       height: 80.0,
@@ -264,16 +280,16 @@ class _DashboardViewState extends State<DashboardView> {
               ),
               const Row(
                 children: [
-                   Padding(
-                     padding: EdgeInsets.only(left: 20.0),
-                     child: Text(
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: Text(
                       "Filter Task by",
                       style: TextStyle(
                           color: Colors.blueGrey,
                           fontSize: 18,
                           fontWeight: FontWeight.w700),
-                                       ),
-                   ),
+                    ),
+                  ),
                 ],
               ),
               Row(
@@ -286,7 +302,9 @@ class _DashboardViewState extends State<DashboardView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>  TaskPlanningListScreen()));
+                                builder: (context) => const TotalTaskList(
+                                      completed: "Total",
+                                    )));
                       },
                       quantity: '1'),
                   smallContainer(
@@ -296,7 +314,8 @@ class _DashboardViewState extends State<DashboardView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const IssuedTaskScreen()));
+                                builder: (context) =>
+                                    const IssuedTaskScreen()));
                       },
                       quantity: '3'),
                   smallContainer(
@@ -332,12 +351,11 @@ class _DashboardViewState extends State<DashboardView> {
                   smallContainer(
                       color: const Color.fromARGB(255, 45, 66, 110),
                       text: "Review",
-                      onPress: (){
+                      onPress: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    ReviewScreen()));
+                                builder: (context) => ReviewScreen()));
                       },
                       quantity: '3'),
                   smallContainer(
@@ -347,7 +365,8 @@ class _DashboardViewState extends State<DashboardView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const ArchivedTaskList()));
+                                builder: (context) =>
+                                    const ArchivedTaskList()));
                       },
                       quantity: '0'),
                 ],

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:srr_management/Screens/Auth/login.dart';
+import 'package:srr_management/Screens/Home/home.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,17 +19,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // ServiceManager().getUserID();
-    // ServiceManager().getTokenID();
+    ServiceManager().getUserID();
+    ServiceManager().getTokenID();
     // LocationService().fetchLocation();
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
-      //if(ServiceManager.userID != ''){
+      if(ServiceManager.userID != ''){
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+            builder: (context) => Home()), (route) => false);
+      } else {
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
             builder: (context) => Login()), (route) => false);
-      // } else {
-      //   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-      //       builder: (context) => Login()), (route) => false);
-      // }
+      }
     });
   }
 

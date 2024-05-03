@@ -3,19 +3,22 @@ import 'dart:convert';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/widgets.dart';
 import 'package:srr_management/Screens/Home/home.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
 
-class CreateTaskScreen extends StatefulWidget {
+class EditTaskScreen extends StatefulWidget {
+  int taskId;
+  EditTaskScreen({super.key, required this.taskId});
   @override
-  _CreateTaskScreenState createState() => _CreateTaskScreenState();
+  _EditTaskScreenState createState() => _EditTaskScreenState();
 }
 
-class _CreateTaskScreenState extends State<CreateTaskScreen> {
+class _EditTaskScreenState extends State<EditTaskScreen> {
   String _selectedPriority =
       'Medium'; // Ensure this matches one of the dropdown items
   String _selectedUser2 = 'Select Member';
@@ -26,7 +29,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   int? _duration;
-  String category = 'a';
+  String category = 'Documentation';
   bool isMoreMember = false;
   //String _filePath = '';
   bool isSelected = false;
@@ -66,6 +69,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         _duration = _endDate!.difference(_startDate!).inDays;
       });
     }
+  }
+  getTaskData()async
+  {
+    String url = APIData.getAllTaskForAdmin;
+    print(url);
+
+    var res = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    }, body: {});
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+
+      var data = jsonDecode(res.body);
+
+    //  _streamController.add(data['task']);
+    }
+    return 'Success';
   }
 
   final List<String> _userList = [
@@ -120,14 +142,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final difference = _endDate!.difference(_startDate!);
     final days = difference.inDays;
     final hours = difference.inHours.remainder(24);
-    return '$days days'; //and $hours hours';
+    return '$days days and $hours hours';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Task'),
+        title: const Text('Edit Task'),
       ),
       body: Container(
         decoration: kBackgroundDesign(context),
@@ -181,10 +203,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     });
                   },
                   items: <String>[
-                    'a',
-                    'b',
-                    'c',
-                    'd'
+                    'Documentation',
+                    'Leave Management',
+                    'HR',
+                    'Doctor'
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -320,9 +342,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(_startDate != null
-                            ? 
-                            DateFormat('yyyy-MM-dd').format(DateTime.parse( _startDate!.toString()))
-                           .toString()
+                            ? _startDate!.toString()
                             : 'Select Start Date'),
                       ],
                     ),
@@ -364,9 +384,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(_endDate != null
-                            ? 
-                            DateFormat('yyyy-MM-dd').format(DateTime.parse( _endDate!.toString()))
-                           .toString()
+                            ? _endDate!.toString()
                             : 'Select End Date'),
                       ],
                     ),
@@ -386,7 +404,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 ElevatedButton(
                   onPressed: () {
                     postTask();
-                    
+
                     // Handle task creation here
                     // print('Task Title: ${_titleController.text}');
                     // print('Task Description: ${_descriptionController.text}');
@@ -404,26 +422,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }
 
   postTask() async {
-    String url = APIData.createTask;
+    String url = "${APIData.upDateTask}/29";
     print(url.toString());
     var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
-      'title':_titleController.text,
-      'description': _descriptionController.text,
-      'start_date':_startDate.toString(),
-      'end_date': _endDate.toString(),
-      'user_ids':jsonEncode(['23','89']),
-      'category_id': category,
-      'priority': _selectedPriority,
+      'title': "This is test edited ",
+      'description': "this is test xxs",
+      'start_date': "2024-04-28",
+      'end_date': "2024-04-28",
+      'user_ids': jsonEncode(['23', '89']),
+      'category_id': "hghh",
+      'priority': "high",
     });
     if (res.statusCode == 200) {
-      toastMessage(message: 'Task Created');
+      toastMessage(message: 'Request Submitted');
       print(res.body);
-      var data = jsonDecode(res.body); 
+      var data = jsonDecode(res.body);
       print(data.toString());
-      Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const Home()));
-    }
-    else{
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const Home()));
+    } else {
       print(res.body);
     }
     return 'Success';

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:srr_management/Screens/task/editTask.dart';
 import 'package:srr_management/Screens/task/taskDetailScreen.dart';
 import 'package:srr_management/Screens/task/taskModel.dart';
 import 'package:srr_management/components/buttons.dart';
@@ -67,7 +69,8 @@ class _TotalTaskListState extends State<TotalTaskList> {
   ];
   taskElement({task, onPress, color}) {
     return Card(
-      color: task.isDone ? const Color.fromARGB(255, 197, 198, 199) : Colors.white,
+      color:
+          task.isDone ? const Color.fromARGB(255, 197, 198, 199) : Colors.white,
       elevation: 2,
       child: ListTile(
         leading: Image.asset(
@@ -77,7 +80,12 @@ class _TotalTaskListState extends State<TotalTaskList> {
         ),
         title: Text(task.name),
         subtitle: Text(task.description),
-        trailing: const Icon(Icons.arrow_forward),
+        trailing: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.arrow_forward),
+          ],
+        ),
         onTap: onPress,
       ),
     );
@@ -88,45 +96,50 @@ class _TotalTaskListState extends State<TotalTaskList> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Tasks'),
-        
       ),
       body: Container(
         decoration: kBackgroundDesign(context),
         child: SingleChildScrollView(
             child: Column(
-              children: [
-                ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: tasks.length,
-                          separatorBuilder: (BuildContext context, int index) {
+          children: [
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: tasks.length,
+              separatorBuilder: (BuildContext context, int index) {
                 return Container(height: 10, color: Colors.transparent);
-                          },
-                          itemBuilder: (context, index) {
-                return widget.completed=='Completed'?
-                tasks[index].isDone==true?taskElement(
-                  task: tasks[index],
-                  onPress: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const TaskDetailsScreen()));
-                  },
-                ):Container():taskElement(
-                  task: tasks[index],
-                  onPress: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const TaskDetailsScreen()));
-                  },
-                );
-                          },
-                        ),
-                 
-                        Container(height: MediaQuery.of(context).size.height/2,)
-              ],
-            )),
+              },
+              itemBuilder: (context, index) {
+                return widget.completed == 'Completed'
+                    ? tasks[index].isDone == true
+                        ? taskElement(
+                            task: tasks[index],
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const TaskDetailsScreen()));
+                            },
+                          )
+                        : Container()
+                    : taskElement(
+                        task: tasks[index],
+                        onPress: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const TaskDetailsScreen()));
+                        },
+                      );
+              },
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height / 2,
+            )
+          ],
+        )),
       ),
     );
   }

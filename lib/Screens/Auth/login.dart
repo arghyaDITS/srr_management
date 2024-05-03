@@ -1,11 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:srr_management/Screens/Auth/forgotpassword.dart';
 import 'package:srr_management/Screens/Auth/registration.dart';
+import 'package:srr_management/Screens/Home/dashboard.dart';
 import 'package:srr_management/Screens/Home/home.dart';
 import 'package:srr_management/components/buttons.dart';
 import 'package:srr_management/components/custom_textField.dart';
+import 'package:srr_management/components/util.dart';
+import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
+import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -21,6 +28,14 @@ class _LoginState extends State<Login> {
 
   bool isObscure = true;
   bool isLoading = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    email.text = "krishnabasak.dits@gmail.com";
+    password.text = "12345678";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,11 +59,11 @@ class _LoginState extends State<Login> {
                 width: 100,
               ),
               const SizedBox(height: 20),
-               Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(
-                  textAlign: TextAlign.center,
-                  style: kHeaderStyle(color: Colors.blueGrey),
+                    textAlign: TextAlign.center,
+                    style: kHeaderStyle(color: Colors.blueGrey),
                     "Please enter your valid email address, we don't share it with anyone without your consent"),
               ),
               const SizedBox(height: 40),
@@ -72,31 +87,36 @@ class _LoginState extends State<Login> {
                       : Icons.visibility),
                 ),
               ),
-             
-              
-               Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                Padding(
-                  padding: const EdgeInsets.only(right:  12.0),
-                  child:TextButton(child:  Text("Forgotten Password?",style: linkTextStyle(context),),onPressed: (){
-                    Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ForgetPasswordScreen(),
-                  ),
-                );
-                  },),
-                )
-
-              ],),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: TextButton(
+                      child: Text(
+                        "Forgotten Password?",
+                        style: linkTextStyle(context),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ForgetPasswordScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                ],
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
                         style: TextStyle(
-                            color: Theme.of(context).textTheme.bodySmall!.color),
+                            color:
+                                Theme.of(context).textTheme.bodySmall!.color),
                         children: <TextSpan>[
                           const TextSpan(text: 'By continuing you agree to '),
                           TextSpan(
@@ -125,24 +145,58 @@ class _LoginState extends State<Login> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: isLoading != true ? KButton(
-          title: 'Login',
-          onClick: (){
-            if(_formKey.currentState!.validate()){
-              // setState(() {
-              //   isLoading = true;
-              // });
-            
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Home()));
-                      
-              
-             // loginUser(context);
-            }
-          },
-        ) : LoadingButton(),
+      floatingActionButton: isLoading != true
+          ? KButton(
+              title: 'Login',
+              onClick: () {
+                if (_formKey.currentState!.validate()) {
+                  // setState(() {
+                  //   isLoading = true;
+                  // });
+                  loginUser(context);
+
+                  // loginUser(context);
+                }
+              },
+            )
+          : LoadingButton(),
     );
+  }
+
+  Future<String> loginUser(context) async {
+    String url = APIData.login;
+    print(url.toString());
+    var res = await http.post(Uri.parse(url), body: {
+      'email': email.text,
+      'password': password.text,
+    });
+    if (res.statusCode == 200) {
+      print("______________________________________");
+      print(res.body);
+      print("______________________________________");
+      var data = jsonDecode(res.body);
+      try {
+        print('${data['userInfo']['id']}');
+         ServiceManager().setUser('${data['userInfo']['id']}');
+         ServiceManager().setToken('${data['token']}');
+        ServiceManager.userID = '${data['userInfo']['id']}';
+       ServiceManager.tokenID = '${data['token']}';
+        toastMessage(message: 'Logged In');
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (context) => Home()), (route) => false);
+      } catch (e) {
+        toastMessage(message: e.toString());
+        setState(() {
+          isLoading = false;
+        });
+        toastMessage(message: 'Something went wrong');
+      }
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      toastMessage(message: 'Invalid email or password');
+    }
+    return 'Success';
   }
 }
