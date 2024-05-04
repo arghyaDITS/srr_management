@@ -20,6 +20,7 @@ class APIData {
    static const String applyLeave='${baseURL}api/saveLeaves';
    static const String changeLeaveStatus='${baseURL}api/updateStatus';
    static const String userWiseLeave='${baseURL}api/userWiseLeave';
+  static const String userSingleLeave= '${baseURL}api/user_wise_leave_with_id';
 
 
   static Map<String, String> kHeader = {

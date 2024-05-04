@@ -25,10 +25,34 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
 
    @override
   void initState() {
-    
+
     super.initState();
+    print(widget.leaveId);
+    widget.leaveId!=null? getSingleLeaveData(widget.leaveId):null;
+   
+
 
   }
+   getSingleLeaveData(leaveId) async {
+    print(ServiceManager.userID.toString());
+    String url = '${APIData.userSingleLeave}/$leaveId';
+    var res = await http.get(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+      var data = jsonDecode(res.body);
+      //print(data['data'][{'leave_type'}]);
+      // print(data['data']['leave_type']);
+      // //_leaveDescriptionController.text=data['leave_desc'];
+      // _leaveType=data['data']['leave_type'];
+     
+    }
+    return 'Success';
+  }
+  
 
   applyLeave() async {
     isLoading = true;
@@ -41,6 +65,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
       'total_days': _numberOfDays.toString(),
       'from_date': _fromDate.toString(),
       'to_date': _toDate.toString(),
+      'leave_desc':_leaveDescriptionController.text
       
      
     });
