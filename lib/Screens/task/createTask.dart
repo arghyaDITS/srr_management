@@ -7,10 +7,13 @@ import 'package:intl/intl.dart';
 import 'package:srr_management/Screens/Home/home.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
 
 class CreateTaskScreen extends StatefulWidget {
+  int? taskId;
+  CreateTaskScreen({super.key, this.taskId});
   @override
   _CreateTaskScreenState createState() => _CreateTaskScreenState();
 }
@@ -31,6 +34,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   //String _filePath = '';
   bool isSelected = false;
   List<String> userList = [];
+  bool isLoading = false;
+  final List<String> _userList =[];
 
   late String _filePath; // Variable to store the path of the selected file
 
@@ -58,6 +63,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   void initState() {
     super.initState();
     _filePath = ''; // Initialize file path
+    print(widget.taskId);
+    widget.taskId != null ? getTaskData() : null;
+    getUserList();
   }
 
   void _calculateDuration() {
@@ -67,19 +75,38 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       });
     }
   }
+getUserList()async
+{
+   setState(() {
+      isLoading = true;
+    });
+    String url = APIData.getUserList;
+    print(url);
 
-  final List<String> _userList = [
-    'User 1',
-    'User 2',
-    'User 3',
-    'User 4',
-    'User 5',
-    'User 6',
-    'User 7',
-    'User 8',
-    'a',
-    'b',
-  ];
+    var res = await http.get(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    },);
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+
+      var data = jsonDecode(res.body);
+      print(data.toString());
+       for (var user in data) {
+    _userList.add(user['name']);
+  }
+
+      setState(() {
+        isLoading = false;
+      });
+
+      //   _streamController.add(data['task']);
+    }
+    return 'Success';
+
+}
+ 
   userField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -123,11 +150,45 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     return '$days days'; //and $hours hours';
   }
 
+  getTaskData() async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = APIData.getTaskById;
+    print(url);
+
+    var res = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    }, body: {
+      'task_id': widget.taskId.toString()
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+
+      var data = jsonDecode(res.body);
+      _titleController.text = data['task']['title'];
+      _descriptionController.text = data['task']['description'];
+      _startDate = DateTime.parse(data['task']['start_date']);
+      _endDate = DateTime.parse(data['task']['end_date']);
+      _selectedPriority = data['task']['priority']=='high'?"High":data['task']['priority']=='low'?"Low":"Medium";
+      category = data['task']['category_id'];
+
+      setState(() {
+        isLoading = false;
+      });
+
+      //   _streamController.add(data['task']);
+    }
+    return 'Success';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Task'),
+        title: Text(widget.taskId == null ? 'Create Task' : "Edit Task"),
       ),
       body: Container(
         decoration: kBackgroundDesign(context),
@@ -180,12 +241,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       category = value!;
                     });
                   },
-                  items: <String>[
-                    'a',
-                    'b',
-                    'c',
-                    'd'
-                  ].map<DropdownMenuItem<String>>((String value) {
+                  items: <String>['a', 'b', 'c', 'd']
+                      .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -320,9 +377,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(_startDate != null
-                            ? 
-                            DateFormat('yyyy-MM-dd').format(DateTime.parse( _startDate!.toString()))
-                           .toString()
+                            ? DateFormat('yyyy-MM-dd')
+                                .format(DateTime.parse(_startDate!.toString()))
+                                .toString()
                             : 'Select Start Date'),
                       ],
                     ),
@@ -364,9 +421,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(_endDate != null
-                            ? 
-                            DateFormat('yyyy-MM-dd').format(DateTime.parse( _endDate!.toString()))
-                           .toString()
+                            ? DateFormat('yyyy-MM-dd')
+                                .format(DateTime.parse(_endDate!.toString()))
+                                .toString()
                             : 'Select End Date'),
                       ],
                     ),
@@ -385,15 +442,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    postTask();
-                    
+                   widget.taskId!=null?editTask(): postTask();
+
                     // Handle task creation here
                     // print('Task Title: ${_titleController.text}');
                     // print('Task Description: ${_descriptionController.text}');
                     // print('Priority: $_selectedPriority');
                     // print('Assigned User: $_selectedUser');
                   },
-                  child: const Text('Create Task'),
+                  child:  Text(widget.taskId!=null?'Edit Task':'Create Task'),
                 ),
               ],
             ),
@@ -402,28 +459,51 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       ),
     );
   }
-
-  postTask() async {
-    String url = APIData.createTask;
+  editTask() async {
+    String url = "${APIData.upDateTask}/${widget.taskId}";
     print(url.toString());
     var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
-      'title':_titleController.text,
+      'title': _titleController.text,
       'description': _descriptionController.text,
-      'start_date':_startDate.toString(),
+      'start_date': _startDate.toString(),
       'end_date': _endDate.toString(),
-      'user_ids':jsonEncode(['23','89']),
+      'user_ids': jsonEncode(['23', '89']),
       'category_id': category,
       'priority': _selectedPriority,
     });
     if (res.statusCode == 200) {
       toastMessage(message: 'Task Created');
       print(res.body);
-      var data = jsonDecode(res.body); 
+      var data = jsonDecode(res.body);
       print(data.toString());
-      Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const Home()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const Home()));
+    } else {
+      print(res.body);
     }
-    else{
+    return 'Success';
+  }
+
+  postTask() async {
+    String url = APIData.createTask;
+    print(url.toString());
+    var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
+      'title': _titleController.text,
+      'description': _descriptionController.text,
+      'start_date': _startDate.toString(),
+      'end_date': _endDate.toString(),
+      'user_ids': jsonEncode(['23', '89']),
+      'category_id': category,
+      'priority': _selectedPriority,
+    });
+    if (res.statusCode == 200) {
+      toastMessage(message: 'Task Created');
+      print(res.body);
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const Home()));
+    } else {
       print(res.body);
     }
     return 'Success';

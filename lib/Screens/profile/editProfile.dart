@@ -8,8 +8,11 @@ import 'package:srr_management/components/custom_textField.dart';
 import 'package:srr_management/components/dataBase.dart';
 import 'package:srr_management/components/imgPickerPopup.dart';
 import 'package:srr_management/components/util.dart';
+import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/colors.dart';
 import 'package:srr_management/theme/style.dart';
+import 'package:http/http.dart' as http;
 
 class EditProfile extends StatefulWidget {
   const EditProfile({Key? key}) : super(key: key);
@@ -108,35 +111,40 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void getUserData() async {
-    // String url = APIData.userDetails;
-    // var res = await http.post(Uri.parse(url), headers: {
-    //   'Accept': 'application/json',
-    //   'Authorization': 'Bearer ${ServiceManager.tokenID}',
-    // }, body: {
-    //   'user_id': ServiceManager.userID,
-    // });
-    // if(res.statusCode == 200){
-    //   var data = jsonDecode(res.body);
-    //   profileURL = '${data['user_details']['photo']}';
-    //   name.text = '${data['user_details']['name']}';
-    //   email.text = '${data['user_details']['email']}';
-    //   mobile.text = data['user_details']['mobile'] ?? '';
-    //   whatsapp.text = data['user_details']['whatsapp_no'] ?? '';
-    //   genderValue = data['user_details']['gender'] ?? '';
-    //   fatherName.text = data['user_details']['father_husband_name'] ?? '';
-    //   motherName.text = data['user_details']['mother_name'] ?? '';
-    //   dateOfBirth.text = data['user_details']['dob'] ?? '';
-    //   experience.text = data['user_details']['work_experience'] ?? '';
+    String url = APIData.userDetails;
+    print(url);
+    var res = await http.get(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    });
+    print(res.statusCode);
+    if(res.statusCode == 200){
+      print(res.body);
+       var data = jsonDecode(res.body);
+      profileURL = '${data['user']['profile_image']}';
+       name.text = '${data['user']['name']}';
+       email.text = '${data['user']['email']}';
+       mobile.text = data['user']['phone_no'] ?? '';
+      // whatsapp.text = data['user_details']['whatsapp_no'] ?? '';
+      // genderValue = data['user_details']['gender'] ?? '';
+      // fatherName.text = data['user_details']['father_husband_name'] ?? '';
+      // motherName.text = data['user_details']['mother_name'] ?? '';
+      // dateOfBirth.text = data['user_details']['dob'] ?? '';
+      // experience.text = data['user_details']['work_experience'] ?? '';
 
-    //   // userAltMobile = data['user_details']['alternative_mob'] ?? '';
-    //   // designation = data['user_details']['Designation'] ?? '';
+      // // userAltMobile = data['user_details']['alternative_mob'] ?? '';
+      // // designation = data['user_details']['Designation'] ?? '';
 
-    //   // roleValue = ServiceManager.jobRole;
-    //   // currentAddress.text = ServiceManager.currentAddress;
-    //   // permanentAddress.text = ServiceManager.permanentAddress;
-    //   isLoading = false;
-    //   setState(() {});
-    // }
+      // // roleValue = ServiceManager.jobRole;
+      // // currentAddress.text = ServiceManager.currentAddress;
+      // // permanentAddress.text = ServiceManager.permanentAddress;
+      // isLoading = false;
+      // setState(() {});
+    }
+  }
+  updateUserData()
+  {
+    
   }
 
   @override
@@ -158,25 +166,25 @@ class _EditProfileState extends State<EditProfile> {
             kSpace(),
             Stack(
               children: [
-                 const CircleAvatar(
-                      radius: 70,
-                      backgroundImage: AssetImage('images/img_blank_profile.png'),
-                    ) ,
-                // CircleAvatar(
-                //     radius: 75,
-                //     backgroundColor:Theme.of(context).scaffoldBackgroundColor != Colors.black ?
-                //     Colors.white : kDarkColor,
-                //     child: _image != null ? CircleAvatar(
-                //       radius: 70,
-                //       backgroundImage: FileImage(File(_image!.path)),
-                //     ) : ServiceManager.profileURL == '' ? CircleAvatar(
+                //  const CircleAvatar(
                 //       radius: 70,
                 //       backgroundImage: AssetImage('images/img_blank_profile.png'),
-                //     ) : CircleAvatar(
-                //     radius: 70,
-                //     backgroundImage: NetworkImage(ServiceManager.profileURL),
-                //   ),
-                // ),
+                //     ) ,
+                CircleAvatar(
+                    radius: 75,
+                    backgroundColor:Theme.of(context).scaffoldBackgroundColor != Colors.black ?
+                    Colors.white : kDarkColor,
+                    child: _image != null ? CircleAvatar(
+                      radius: 70,
+                      backgroundImage: FileImage(File(_image!.path)),
+                    ) : ServiceManager.profileURL == '' ? CircleAvatar(
+                      radius: 70,
+                      backgroundImage: AssetImage('images/img_blank_profile.png'),
+                    ) : CircleAvatar(
+                    radius: 70,
+                    backgroundImage: NetworkImage(ServiceManager.profileURL),
+                  ),
+                ),
                 Positioned(
                   right: 0.0,
                   bottom: 0.0,

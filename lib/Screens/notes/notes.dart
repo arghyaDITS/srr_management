@@ -1,7 +1,12 @@
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:srr_management/Screens/notes/noteModel.dart';
+import 'package:srr_management/components/util.dart';
+import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
+import 'package:http/http.dart' as http;
 
 class AddNoteScreen extends StatefulWidget {
   @override
@@ -11,6 +16,61 @@ class AddNoteScreen extends StatefulWidget {
 class _AddNoteScreenState extends State<AddNoteScreen> {
   final List<Note> notes = [];
   final TextEditingController _textController = TextEditingController();
+  bool isLoading = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAllNoteList();
+  }
+
+  createNote() async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = APIData.postNote;
+    print(ServiceManager.userID);
+    print(_textController.text);
+    print(url.toString());
+    var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
+      "title": "test",
+      "description": _textController.text,
+      "user_id": ServiceManager.userID
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      toastMessage(message: 'Note Added');
+      print(res.body);
+      var data = jsonDecode(res.body);
+      setState(() {
+        isLoading = false;
+      });
+    }
+    return 'Success';
+  }
+
+  getAllNoteList() async {
+    String url = APIData.getNoteList;
+    print(url);
+
+    var res = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ${ServiceManager.tokenID}',
+      },
+    );
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+
+      var data = jsonDecode(res.body);
+
+      //_streamController.add(data['task']);
+    }
+    return 'Success';
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +129,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               TextField(
                 controller: _textController,
                 decoration: InputDecoration(labelText: 'Enter your note'),
-                maxLines: null,
+                maxLines: 5,
               ),
               SizedBox(height: 10),
               Row(
@@ -78,7 +138,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   TextButton(
                     onPressed: () {
                       setState(() {
-                        notes.add(Note(text: _textController.text));
+                        // notes.add(Note(text: _textController.text));
+
+                        createNote();
                         _textController.clear();
                         Navigator.of(context).pop();
                       });

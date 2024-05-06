@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:srr_management/Screens/task/createTask.dart';
 import 'package:srr_management/Screens/task/editTask.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
@@ -157,18 +158,23 @@ class _AdminTaskListState extends State<AdminTaskList>
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
+                                            Expanded(child: Container(child: 
                                             Text(
                                                 'Title: ${data[index]['title']} ${data[index]['id']}',
                                                 style: const TextStyle(
                                                     fontWeight:
-                                                        FontWeight.w600)),
+                                                        FontWeight.w600)))),
                                             IconButton(
                                                 onPressed: () {
                                                   Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              EditTaskScreen(taskId:data[index]['id'] ,)));
+                                                              CreateTaskScreen(
+                                                                taskId:
+                                                                    data[index]
+                                                                        ['id'],
+                                                              )));
                                                 },
                                                 icon: Icon(Icons.edit))
                                           ],
