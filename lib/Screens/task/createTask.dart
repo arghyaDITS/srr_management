@@ -35,9 +35,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   bool isSelected = false;
   List<String> userList = [];
   bool isLoading = false;
-  final List<String> _userList =[];
+  final List<String> _userList =['Select Member'];
 
   late String _filePath; // Variable to store the path of the selected file
+
+    @override
+  void initState() {
+    super.initState();
+    _filePath = ''; // Initialize file path
+    print(widget.taskId);
+    widget.taskId != null ? getTaskData() : null;
+    getUserList();
+  }
 
   Future<void> _openFileExplorer() async {
     try {
@@ -59,14 +68,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _filePath = ''; // Initialize file path
-    print(widget.taskId);
-    widget.taskId != null ? getTaskData() : null;
-    getUserList();
-  }
+
 
   void _calculateDuration() {
     if (_startDate != null && _endDate != null) {
@@ -198,6 +200,8 @@ getUserList()async
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+
+                //------Title--------
                 TextField(
                   controller: _titleController,
                   decoration: const InputDecoration(
@@ -206,6 +210,7 @@ getUserList()async
                   ),
                 ),
                 const SizedBox(height: 16.0),
+                //------Desc--------
                 TextField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(
@@ -214,6 +219,7 @@ getUserList()async
                   ),
                 ),
                 const SizedBox(height: 16.0),
+                //------Priority--------
                 DropdownButtonFormField<String>(
                   value: _selectedPriority,
                   onChanged: (value) {
@@ -234,6 +240,7 @@ getUserList()async
                   ),
                 ),
                 const SizedBox(height: 16.0),
+                //------Category--------
                 DropdownButtonFormField<String>(
                   value: category,
                   onChanged: (value) {
@@ -275,18 +282,13 @@ getUserList()async
                 const SizedBox(height: 16.0),
                 //_________________________________________________
                 DropdownButtonFormField<String>(
-                  value: _selectedUser,
+                  value: _selectedUser != '' ? _selectedUser : null,
                   onChanged: (value) {
                     setState(() {
                       _selectedUser = value!;
                     });
                   },
-                  items: <String>[
-                    'Select Member',
-                    'User 1',
-                    'User 2',
-                    'User 3',
-                  ].map<DropdownMenuItem<String>>((String value) {
+                  items:_userList.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -302,19 +304,14 @@ getUserList()async
                 const SizedBox(height: 16.0),
                 isMoreMember
                     ? DropdownButtonFormField<String>(
-                        value: _selectedUser2,
+                        value: _selectedUser2!=''?_selectedUser2:null,
                         onChanged: (value) {
                           setState(() {
                             _selectedUser2 = value!;
                             //  isMoreMember=false;
                           });
                         },
-                        items: <String>[
-                          'Select Member',
-                          'User 1',
-                          'User 2',
-                          'User 3',
-                        ].map<DropdownMenuItem<String>>((String value) {
+                        items: _userList.map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),

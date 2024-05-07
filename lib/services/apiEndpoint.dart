@@ -21,6 +21,7 @@ class APIData {
   //Leave Api
   static const String getTotalLeaveList = '${baseURL}api/getLeaves';
   static const String applyLeave = '${baseURL}api/saveLeaves';
+  static const String editLeave = '${baseURL}api/updateLeaves';
   static const String changeLeaveStatus = '${baseURL}api/updateStatus';
   static const String userWiseLeave = '${baseURL}api/userWiseLeave';
   static const String userSingleLeave = '${baseURL}api/user_wise_leave_with_id';
@@ -29,6 +30,11 @@ class APIData {
   static const String postNote='${baseURL}api/saveNotes';
 
   static const String getNoteList='${baseURL}api/getNotes';
+    static const String updateNote='${baseURL}api/updateNotes';
+
+    static const String deleteNote='${baseURL}api/deleteNotes';
+
+
 
   static Map<String, String> kHeader = {
     'Accept': 'application/json',

@@ -49,7 +49,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
 
       print(data['data'][0]['leave_type']);
       // print(data['data']['leave_type']);
-      // //_leaveDescriptionController.text=data['leave_desc'];
+      _leaveDescriptionController.text = data['data'][0]['leave_desc'];
       _leaveType = data['data'][0]['leave_type'];
       _fromDate = DateTime.parse(data['data'][0]['from_date']);
       _toDate = DateTime.parse(data['data'][0]['to_date']);
@@ -63,9 +63,9 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
   }
 
   applyLeave() async {
-    setState(() {
+    
       isLoading = true;
-    });
+    
     String url = APIData.applyLeave;
     print(ServiceManager.userID);
     print(url.toString());
@@ -82,11 +82,41 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
       toastMessage(message: 'Request Submitted');
       print(res.body);
       var data = jsonDecode(res.body);
+      print(data.toString());
+      
+        isLoading = false;
+     
+    }
+    return 'Success';
+  }
+  editLeave()async{
+     setState(() {
+      isLoading = true;
+    });
+    String url = APIData.editLeave;
+    print(ServiceManager.userID);
+    print(url.toString());
+    var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
+      'id':widget.leaveId,
+      'user_id': ServiceManager.userID,
+      'leave_type': _leaveType,
+      'total_days': _numberOfDays.toString(),
+      'from_date': _fromDate.toString(),
+      'to_date': _toDate.toString(),
+      'leave_desc': _leaveDescriptionController.text
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      toastMessage(message: 'Request Updated');
+      print(res.body);
+      var data = jsonDecode(res.body);
+      print(data.toString());
       setState(() {
         isLoading = false;
       });
     }
     return 'Success';
+
   }
 
   @override
@@ -223,7 +253,8 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
 
                                 // Add logic to submit leave application
                               },
-                              child: const Text('Apply'),
+                              child: Text(
+                                  widget.leaveId != null ? 'Update' : 'Apply'),
                             )
                           : LoadingIcon(),
                     ),
