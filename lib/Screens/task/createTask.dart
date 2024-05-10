@@ -5,6 +5,8 @@ import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:srr_management/Screens/Home/home.dart';
+import 'package:srr_management/Screens/task/model/userModel.dart';
+import 'package:srr_management/Screens/task/planningTask.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
@@ -28,6 +30,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   TextEditingController _descriptionController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   int? _duration;
   String category = 'a';
   bool isMoreMember = false;
@@ -35,17 +40,32 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   bool isSelected = false;
   List<String> userList = [];
   bool isLoading = false;
-  final List<String> _userList =['Select Member'];
+  final List<String> _userList = [];
+  final List<int> _userIdList = [];
+  List assignedUserId = [];
+  List<Users> selectedUsers = [];
 
   late String _filePath; // Variable to store the path of the selected file
+  List<String> allUsers = [
+    "User 1",
+    "User 2",
+    "User 3",
+    "User 4",
+    "User 5",
+    // Add more users as needed
+  ];
+  String? selectedUser;
+  late List<int> selectedUserIds =
+      selectedUsers.map((user) => user.id).toList();
 
-    @override
+  @override
   void initState() {
     super.initState();
     _filePath = ''; // Initialize file path
     print(widget.taskId);
     widget.taskId != null ? getTaskData() : null;
     getUserList();
+    selectedUserIds = [];
   }
 
   Future<void> _openFileExplorer() async {
@@ -68,8 +88,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     }
   }
 
-
-
   void _calculateDuration() {
     if (_startDate != null && _endDate != null) {
       setState(() {
@@ -77,27 +95,31 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       });
     }
   }
-getUserList()async
-{
-   setState(() {
+
+  getUserList() async {
+    setState(() {
       isLoading = true;
     });
     String url = APIData.getUserList;
     print(url);
 
-    var res = await http.get(Uri.parse(url), headers: {
-      'Accept': 'application/json',
-      'Authorization': 'Bearer ${ServiceManager.tokenID}',
-    },);
+    var res = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ${ServiceManager.tokenID}',
+      },
+    );
     print(res.statusCode);
     if (res.statusCode == 200) {
       print(res.body);
 
       var data = jsonDecode(res.body);
       print(data.toString());
-       for (var user in data) {
-    _userList.add(user['name']);
-  }
+      for (var user in data) {
+        _userList.add(user['name']);
+        _userIdList.add(user['id']);
+      }
 
       setState(() {
         isLoading = false;
@@ -106,44 +128,43 @@ getUserList()async
       //   _streamController.add(data['task']);
     }
     return 'Success';
-
-}
- 
-  userField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AutoCompleteTextField<String>(
-          key: GlobalKey(),
-          clearOnSubmit: false,
-          suggestions: _userList,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Assign User',
-          ),
-          itemFilter: (item, query) {
-            return item.toLowerCase().startsWith(query.toLowerCase());
-          },
-          itemSorter: (a, b) {
-            return a.compareTo(b);
-          },
-          itemSubmitted: (item) {
-            setState(() {
-              _selectedUser = item;
-              isSelected = true;
-              isMoreMember = false;
-              userList.add(item);
-            });
-          },
-          itemBuilder: (context, item) {
-            return ListTile(
-              title: Text(item),
-            );
-          },
-        ),
-      ],
-    );
   }
+
+  // userField() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.stretch,
+  //     children: [
+  //       AutoCompleteTextField<String>(
+  //         key: GlobalKey(),
+  //         clearOnSubmit: false,
+  //         suggestions: _userList,
+  //         decoration: const InputDecoration(
+  //           border: OutlineInputBorder(),
+  //           labelText: 'Assign User',
+  //         ),
+  //         itemFilter: (item, query) {
+  //           return item.toLowerCase().startsWith(query.toLowerCase());
+  //         },
+  //         itemSorter: (a, b) {
+  //           return a.compareTo(b);
+  //         },
+  //         itemSubmitted: (item) {
+  //           setState(() {
+  //             _selectedUser = item;
+  //             isSelected = true;
+  //             isMoreMember = false;
+  //             userList.add(item);
+  //           });
+  //         },
+  //         itemBuilder: (context, item) {
+  //           return ListTile(
+  //             title: Text(item),
+  //           );
+  //         },
+  //       ),
+  //     ],
+  //   );
+  // }
 
   String _calculateDifference() {
     final difference = _endDate!.difference(_startDate!);
@@ -174,7 +195,11 @@ getUserList()async
       _descriptionController.text = data['task']['description'];
       _startDate = DateTime.parse(data['task']['start_date']);
       _endDate = DateTime.parse(data['task']['end_date']);
-      _selectedPriority = data['task']['priority']=='high'?"High":data['task']['priority']=='low'?"Low":"Medium";
+      _selectedPriority = data['task']['priority'] == 'high'
+          ? "High"
+          : data['task']['priority'] == 'low'
+              ? "Low"
+              : "Medium";
       category = data['task']['category_id'];
 
       setState(() {
@@ -184,6 +209,72 @@ getUserList()async
       //   _streamController.add(data['task']);
     }
     return 'Success';
+  }
+
+  //--------------
+  userSelectionWidget() {
+    return Column(
+      children: [
+        SimpleAutoCompleteTextField(
+          key: GlobalKey<AutoCompleteTextFieldState<String>>(),
+          suggestions: _userList, //allUsers,
+          decoration: const InputDecoration(
+            labelText: 'Assign member',
+            border: OutlineInputBorder(),
+          ),
+          textChanged: (text) {
+            selectedUser = text;
+          },
+          textSubmitted: (text) {
+            setState(() {
+              int userId = _userIdList[_userList.indexOf(text)];
+              selectedUsers.add(Users(name: text, id: userId));
+              print(selectedUsers.toList());
+              updateSelectedUserIds();
+              print(selectedUserIds.toString());
+              // if (!selectedUsers.contains(text)) {
+              //   selectedUsers.add(text);
+              // }
+            });
+          },
+        ),
+        const SizedBox(height: 10),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: selectedUsers.length,
+          itemBuilder: (context, index) {
+            return Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.blue, 
+                ),
+              ),
+              child: ListTile(
+                title: Text(
+                  selectedUsers[index].name,
+                  style: kBoldStyle(),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.remove_circle),
+                  onPressed: () {
+                    setState(() {
+                      selectedUsers.removeAt(index);
+                      updateSelectedUserIds();
+                      print(selectedUserIds.toString());
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void updateSelectedUserIds() {
+    selectedUserIds = selectedUsers.map((user) => user.id).toList();
   }
 
   @override
@@ -197,265 +288,300 @@ getUserList()async
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  //------Title--------
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Task Title',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter text';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  //------Desc--------
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Task Description',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter text';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  //------Priority--------
+                  DropdownButtonFormField<String>(
+                    value: _selectedPriority,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedPriority = value!;
+                      });
+                    },
+                    items: <String>['High', 'Medium', 'Low']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Priority',
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  //------Category--------
+                  DropdownButtonFormField<String>(
+                    value: category,
+                    onChanged: (value) {
+                      setState(() {
+                        category = value!;
+                      });
+                    },
+                    items: <String>['a', 'b', 'c', 'd']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Select Category',
+                    ),
+                  ),
+                  // DropdownButtonFormField<String>(
+                  //   value: _selectedUser,
+                  //   onChanged: (value) {
+                  //     setState(() {
+                  //       _selectedUser = value!;
+                  //     });
+                  //   },
+                  //   items: _userList
+                  //       .map<DropdownMenuItem<String>>((String value) {
+                  //     return DropdownMenuItem<String>(
+                  //       value: value,
+                  //       child: Text(value),
+                  //     );
+                  //   }).toList(),
+                  //   decoration: InputDecoration(
+                  //     border: OutlineInputBorder(),
+                  //     labelText: 'Assign User',
+                  //   ),
+                  // ),
+                  const SizedBox(height: 16.0),
+                  //_________________________________________________
+                  userSelectionWidget(),
 
-                //------Title--------
-                TextField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Task Title',
+//_______________________________________--
+
+                  // DropdownButtonFormField<String>(
+                  //   value: _selectedUser != '' ? _selectedUser : null,
+                  //   onChanged: (value) {
+                  //     setState(() {
+                  //       _selectedUser = value!;
+                  //     });
+                  //   },
+                  //   items:
+                  //       _userList.map<DropdownMenuItem<String>>((String value) {
+                  //     return DropdownMenuItem<String>(
+                  //       value: value,
+                  //       child: Text(value),
+                  //     );
+                  //   }).toList(),
+                  //   decoration: const InputDecoration(
+                  //     border: OutlineInputBorder(),
+                  //     labelText: 'Select Category',
+                  //   ),
+                  // ),
+                  //__________________________________________________________
+                  //userField(),
+                  const SizedBox(height: 16.0),
+                  isMoreMember
+                      ? DropdownButtonFormField<String>(
+                          value: _selectedUser2 != '' ? _selectedUser2 : null,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedUser2 = value!;
+                              //  isMoreMember=false;
+                            });
+                          },
+                          items: _userList
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Select Category',
+                          ),
+                        )
+                      : Container(),
+                  Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              isMoreMember = true;
+                            });
+                          },
+                          icon: const Icon(Icons.add)),
+                      const Text("Add more member")
+                    ],
                   ),
-                ),
-                const SizedBox(height: 16.0),
-                //------Desc--------
-                TextField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Task Description',
+
+                  const SizedBox(height: 10),
+                  _filePath.isNotEmpty
+                      ? Text('Selected File: $_filePath')
+                      : const SizedBox(),
+                  const Text(
+                    'Start Date:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
                   ),
-                ),
-                const SizedBox(height: 16.0),
-                //------Priority--------
-                DropdownButtonFormField<String>(
-                  value: _selectedPriority,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedPriority = value!;
-                    });
-                  },
-                  items: <String>['High', 'Medium', 'Low']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Priority',
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                //------Category--------
-                DropdownButtonFormField<String>(
-                  value: category,
-                  onChanged: (value) {
-                    setState(() {
-                      category = value!;
-                    });
-                  },
-                  items: <String>['a', 'b', 'c', 'd']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Select Category',
-                  ),
-                ),
-                // DropdownButtonFormField<String>(
-                //   value: _selectedUser,
-                //   onChanged: (value) {
-                //     setState(() {
-                //       _selectedUser = value!;
-                //     });
-                //   },
-                //   items: _userList
-                //       .map<DropdownMenuItem<String>>((String value) {
-                //     return DropdownMenuItem<String>(
-                //       value: value,
-                //       child: Text(value),
-                //     );
-                //   }).toList(),
-                //   decoration: InputDecoration(
-                //     border: OutlineInputBorder(),
-                //     labelText: 'Assign User',
-                //   ),
-                // ),
-                const SizedBox(height: 16.0),
-                //_________________________________________________
-                DropdownButtonFormField<String>(
-                  value: _selectedUser != '' ? _selectedUser : null,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUser = value!;
-                    });
-                  },
-                  items:_userList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Select Category',
-                  ),
-                ),
-                //__________________________________________________________
-                //userField(),
-                const SizedBox(height: 16.0),
-                isMoreMember
-                    ? DropdownButtonFormField<String>(
-                        value: _selectedUser2!=''?_selectedUser2:null,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedUser2 = value!;
-                            //  isMoreMember=false;
-                          });
-                        },
-                        items: _userList.map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Select Category',
+                  //const SizedBox(height: 10.0),
+
+                  GestureDetector(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: _startDate ?? DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2101),
+                      );
+                      if (picked != null && picked != _startDate) {
+                        setState(() {
+                          _startDate = picked;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 10),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black, // Specify your border color here
+                          width: 0.7, // Specify the width of the border
                         ),
-                      )
-                    : Container(),
-                Row(
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isMoreMember = true;
-                          });
-                        },
-                        icon: const Icon(Icons.add)),
-                    const Text("Add more member")
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-                _filePath.isNotEmpty
-                    ? Text('Selected File: $_filePath')
-                    : const SizedBox(),
-                const Text(
-                  'Start Date:',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                //const SizedBox(height: 10.0),
-
-                GestureDetector(
-                  onTap: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: _startDate ?? DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime(2101),
-                    );
-                    if (picked != null && picked != _startDate) {
-                      setState(() {
-                        _startDate = picked;
-                      });
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 10),
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black, // Specify your border color here
-                        width: 0.7, // Specify the width of the border
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_startDate != null
+                              ? DateFormat('yyyy-MM-dd')
+                                  .format(
+                                      DateTime.parse(_startDate!.toString()))
+                                  .toString()
+                              : 'Select Start Date'),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_startDate != null
-                            ? DateFormat('yyyy-MM-dd')
-                                .format(DateTime.parse(_startDate!.toString()))
-                                .toString()
-                            : 'Select Start Date'),
-                      ],
-                    ),
                   ),
-                ),
-                const SizedBox(height: 10.0),
-                const Text(
-                  'End Date:',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                // const SizedBox(height: 10.0),
+                  const SizedBox(height: 10.0),
+                  const Text(
+                    'End Date:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  // const SizedBox(height: 10.0),
 
-                GestureDetector(
-                  onTap: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: _endDate ?? DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime(2101),
-                    );
-                    if (picked != null && picked != _endDate) {
-                      setState(() {
-                        _endDate = picked;
-                      });
-                      _calculateDifference();
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 10),
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black, // Specify your border color here
-                        width: 0.7, // Specify the width of the border
+                  GestureDetector(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: _endDate ?? DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2101),
+                      );
+                      if (picked != null && picked != _endDate) {
+                        setState(() {
+                          _endDate = picked;
+                        });
+                        _calculateDifference();
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 10),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black, // Specify your border color here
+                          width: 0.7, // Specify the width of the border
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_endDate != null
+                              ? DateFormat('yyyy-MM-dd')
+                                  .format(DateTime.parse(_endDate!.toString()))
+                                  .toString()
+                              : 'Select End Date'),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_endDate != null
-                            ? DateFormat('yyyy-MM-dd')
-                                .format(DateTime.parse(_endDate!.toString()))
-                                .toString()
-                            : 'Select End Date'),
-                      ],
-                    ),
                   ),
-                ),
-                const SizedBox(height: 20.0),
-                (_startDate != null && _endDate != null)
-                    ? Text(
-                        'Duration: ${_calculateDifference()}',
-                        style: const TextStyle(fontSize: 16),
-                      )
-                    : Container(),
-                ElevatedButton(
-                  onPressed: () {}, //_openFileExplorer,
-                  child: const Text('Upload Document'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                   widget.taskId!=null?editTask(): postTask();
+                  const SizedBox(height: 20.0),
+                  (_startDate != null && _endDate != null)
+                      ? Text(
+                          'Duration: ${_calculateDifference()}',
+                          style: const TextStyle(fontSize: 16),
+                        )
+                      : Container(),
+                  ElevatedButton(
+                    onPressed: () {}, //_openFileExplorer,
+                    child: const Text('Upload Document'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate() &&
+                          _startDate != null &&
+                          _endDate != null) {
+                        print("yes");
+                        widget.taskId != null ? editTask() : postTask();
+                      } else {
+                        print("No");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Please fill the inputs"),
+                          ),
+                        );
+                      }
 
-                    // Handle task creation here
-                    // print('Task Title: ${_titleController.text}');
-                    // print('Task Description: ${_descriptionController.text}');
-                    // print('Priority: $_selectedPriority');
-                    // print('Assigned User: $_selectedUser');
-                  },
-                  child:  Text(widget.taskId!=null?'Edit Task':'Create Task'),
-                ),
-              ],
+                      // Handle task creation here
+                      // print('Task Title: ${_titleController.text}');
+                      // print('Task Description: ${_descriptionController.text}');
+                      // print('Priority: $_selectedPriority');
+                      // print('Assigned User: $_selectedUser');
+                    },
+                    child: Text(
+                        widget.taskId != null ? 'Edit Task' : 'Create Task'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+
   editTask() async {
     String url = "${APIData.upDateTask}/${widget.taskId}";
     print(url.toString());
@@ -489,7 +615,7 @@ getUserList()async
       'description': _descriptionController.text,
       'start_date': _startDate.toString(),
       'end_date': _endDate.toString(),
-      'user_ids': jsonEncode(['23', '89']),
+      'user_ids': jsonEncode(selectedUserIds),
       'category_id': category,
       'priority': _selectedPriority,
     });

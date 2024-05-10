@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:srr_management/Screens/Leave/applyLeave.dart';
 import 'package:srr_management/Screens/Leave/leaveManagement.dart';
 import 'package:srr_management/Screens/notes/notes.dart';
@@ -11,6 +12,8 @@ import 'package:srr_management/Screens/task/reviewscreen.dart';
 import 'package:srr_management/Screens/task/taskList.dart';
 import 'package:srr_management/Screens/task/totalTaskList.dart';
 import 'package:srr_management/adminAction/addminTaskList.dart';
+import 'package:srr_management/adminAction/testfile.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 
 class DashboardView extends StatefulWidget {
@@ -138,10 +141,17 @@ class _DashboardViewState extends State<DashboardView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Welcome!\n $user ",
-                      textAlign: TextAlign.center,
-                      style: kHeaderStyle(size: 30.0, color: Colors.black87),
+                    GradientText(
+                      "Welcome\n ${ServiceManager.userName.split(" ")[0]}! ",
+                      style: const TextStyle(
+                        fontSize: 28.0,
+                        fontWeight: FontWeight.w700
+                      ),
+                      colors: const [
+                        Colors.purple,
+                        Colors.red,
+                        Color.fromARGB(255, 13, 152, 18),
+                      ],
                     ),
                   ],
                 ),
@@ -158,7 +168,7 @@ class _DashboardViewState extends State<DashboardView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const TaskList()));
+                                builder: (context) =>  UserSelectionScreen()));
                       }),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -261,7 +271,7 @@ class _DashboardViewState extends State<DashboardView> {
                             MaterialPageRoute(
                                 builder: (context) => const AdminTaskList()));
                       }),
-                       smallContainer(
+                  smallContainer(
                       color: const Color.fromARGB(255, 116, 156, 148),
                       text: "Leaves",
                       quantity: '1',
@@ -297,7 +307,7 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   smallContainer(
                       color: Colors.deepOrangeAccent,
-                      text: "Planning",
+                      text: "My Issues",
                       onPress: () {
                         Navigator.push(
                             context,
