@@ -147,6 +147,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               var notes = snapshot.data;
               return Container(
                 decoration: kBackgroundDesign(context),
+                height: MediaQuery.of(context).size.height,
                 child: SingleChildScrollView(
                     child: isLoading == false
                         ? Column(

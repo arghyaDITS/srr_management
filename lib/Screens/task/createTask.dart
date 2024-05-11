@@ -1,17 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:srr_management/Screens/Home/home.dart';
 import 'package:srr_management/Screens/task/model/userModel.dart';
-import 'package:srr_management/Screens/task/planningTask.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
-import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart' as file_picker;
 
 class CreateTaskScreen extends StatefulWidget {
   int? taskId;
@@ -46,14 +47,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   List<Users> selectedUsers = [];
 
   late String _filePath; // Variable to store the path of the selected file
-  List<String> allUsers = [
-    "User 1",
-    "User 2",
-    "User 3",
-    "User 4",
-    "User 5",
-    // Add more users as needed
-  ];
   String? selectedUser;
   late List<int> selectedUserIds =
       selectedUsers.map((user) => user.id).toList();
@@ -68,20 +61,45 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     selectedUserIds = [];
   }
 
-  Future<void> _openFileExplorer() async {
+  // void _openFileExplorer() async {
+  //   try {
+  //     // Open file picker to select file
+  //     final file_selector.XFile? file = await file_selector.openFile(
+  //       acceptedTypeGroups: [
+  //         const file_selector.XTypeGroup(
+  //             label: 'Documents', extensions: ['pdf', 'doc', 'docx'])
+  //       ],
+  //     );
+
+  //     if (file != null) {
+  //       setState(() {
+  //         _filePath = file.path; // Update the selected file path
+  //       });
+
+  //       // Call postTask function with the selected file
+  //       // await postTask(File(file.path));
+  //     }
+  //   } catch (e) {
+  //     print('Error picking file: $e');
+  //   }
+  // }
+  void _openFileExplorer() async {
     try {
       // Open file picker to select file
-      final file_selector.XFile? file = await file_selector.openFile(
-        acceptedTypeGroups: [
-          const file_selector.XTypeGroup(
-              label: 'Documents', extensions: ['pdf', 'doc', 'docx'])
-        ],
+      final result = await file_picker.FilePicker.platform.pickFiles(
+        type: file_picker.FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
       );
 
-      if (file != null) {
+      if (result != null) {
+        final file = File(result.files.single.path!);
+
         setState(() {
           _filePath = file.path; // Update the selected file path
         });
+
+        // Call postTask function with the selected file
+        //   await postTask(file);
       }
     } catch (e) {
       print('Error picking file: $e');
@@ -247,7 +265,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             return Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.blue, 
+                  color: Colors.blue,
                 ),
               ),
               child: ListTile(
@@ -364,25 +382,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       labelText: 'Select Category',
                     ),
                   ),
-                  // DropdownButtonFormField<String>(
-                  //   value: _selectedUser,
-                  //   onChanged: (value) {
-                  //     setState(() {
-                  //       _selectedUser = value!;
-                  //     });
-                  //   },
-                  //   items: _userList
-                  //       .map<DropdownMenuItem<String>>((String value) {
-                  //     return DropdownMenuItem<String>(
-                  //       value: value,
-                  //       child: Text(value),
-                  //     );
-                  //   }).toList(),
-                  //   decoration: InputDecoration(
-                  //     border: OutlineInputBorder(),
-                  //     labelText: 'Assign User',
-                  //   ),
-                  // ),
+
                   const SizedBox(height: 16.0),
                   //_________________________________________________
                   userSelectionWidget(),
@@ -433,23 +433,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           ),
                         )
                       : Container(),
-                  Row(
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              isMoreMember = true;
-                            });
-                          },
-                          icon: const Icon(Icons.add)),
-                      const Text("Add more member")
-                    ],
-                  ),
 
                   const SizedBox(height: 10),
-                  _filePath.isNotEmpty
-                      ? Text('Selected File: $_filePath')
-                      : const SizedBox(),
+
                   const Text(
                     'Start Date:',
                     style: TextStyle(fontWeight: FontWeight.w500),
@@ -512,7 +498,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         setState(() {
                           _endDate = picked;
                         });
-                        _calculateDifference();
+                        if (_startDate != null && _endDate != null) {
+                          _calculateDifference();
+                        }
                       }
                     },
                     child: Container(
@@ -545,20 +533,30 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         )
                       : Container(),
                   ElevatedButton(
-                    onPressed: () {}, //_openFileExplorer,
+                    onPressed: () {
+                      _openFileExplorer();
+                    }, //_openFileExplorer,
                     child: const Text('Upload Document'),
                   ),
+                  _filePath.isNotEmpty
+                      ? Text('Selected File: $_filePath')
+                      : const SizedBox(),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate() &&
                           _startDate != null &&
                           _endDate != null) {
                         print("yes");
-                        widget.taskId != null ? editTask() : postTask();
+                        widget.taskId != null
+                            ? editTask()
+                            :
+                            _filePath==''?postTask():
+                             await postTaskwithFile(
+                                file: _filePath != '' ? File(_filePath) : null);
                       } else {
                         print("No");
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text("Please fill the inputs"),
                           ),
                         );
@@ -590,10 +588,58 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       'description': _descriptionController.text,
       'start_date': _startDate.toString(),
       'end_date': _endDate.toString(),
-      'user_ids': jsonEncode(['23', '89']),
+      'user_ids': jsonEncode(
+          selectedUserIds.map((int number) => number.toString()).toList()),
       'category_id': category,
       'priority': _selectedPriority,
     });
+    if (res.statusCode == 200) {
+      toastMessage(message: 'Task Created');
+      print(res.body);
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const Home()));
+    } else {
+      print(res.body);
+    }
+    return 'Success';
+  }
+
+  postTaskwithFile({File? file}) async {
+    String url = APIData.createTask;
+    print(url.toString());
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    if (file != null) {
+      request.files.add(http.MultipartFile(
+          'file',
+          File(file.path).readAsBytes().asStream(),
+          File(file.path).lengthSync(),
+          filename: file.path.split('/').last));
+    }
+    request.fields['title'] = _titleController.text;
+    request.fields['description'] = _descriptionController.text;
+    request.fields['start_date'] = _startDate.toString();
+    request.fields['end_date'] = _endDate.toString();
+    request.fields['user_ids'] = jsonEncode(
+        selectedUserIds.map((int number) => number.toString()).toList());
+    request.fields['category_id'] = category;
+    request.fields['priority'] = _selectedPriority;
+
+    // var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
+    //   'title': _titleController.text,
+    //   'description': _descriptionController.text,
+    //   'start_date': _startDate.toString(),
+    //   'end_date': _endDate.toString(),
+    //   'user_ids': jsonEncode(selectedUserIds
+    //       .map((int number) => number.toString())
+    //       .toList()), // jsonEncode(selectedUserIds),
+    //   'category_id': category,
+    //   'priority': _selectedPriority,
+    // });
+    var response = await request.send();
+    var res = await http.Response.fromStream(response);
+
     if (res.statusCode == 200) {
       toastMessage(message: 'Task Created');
       print(res.body);
@@ -615,10 +661,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       'description': _descriptionController.text,
       'start_date': _startDate.toString(),
       'end_date': _endDate.toString(),
-      'user_ids': jsonEncode(selectedUserIds),
+      'user_ids': jsonEncode(selectedUserIds
+          .map((int number) => number.toString())
+          .toList()), // jsonEncode(selectedUserIds),
       'category_id': category,
       'priority': _selectedPriority,
     });
+
     if (res.statusCode == 200) {
       toastMessage(message: 'Task Created');
       print(res.body);

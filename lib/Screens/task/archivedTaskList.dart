@@ -1,5 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:srr_management/Screens/Home/home.dart';
+import 'package:srr_management/Screens/task/taskDetailScreen.dart';
 import 'package:srr_management/Screens/task/taskModel.dart';
+import 'package:srr_management/components/buttons.dart';
+import 'package:srr_management/components/util.dart';
+import 'package:srr_management/services/apiEndpoint.dart';
+import 'package:srr_management/services/serViceManager.dart';
+import 'package:http/http.dart' as http;
+import 'package:srr_management/theme/style.dart';
 
 class ArchivedTaskList extends StatefulWidget {
   const ArchivedTaskList({super.key});
@@ -9,60 +20,16 @@ class ArchivedTaskList extends StatefulWidget {
 }
 
 class _ArchivedTaskListState extends State<ArchivedTaskList> {
-  final List<Task> archivedTasks = [
-    Task(
-        name: 'Task 1',
-        description: 'Description of Task 1',
-        imagePath: 'assets/task1_image.jpg',
-        
-        isDone: false),
-    Task(
-        name: 'Task 2',
-        description: 'Description of Task 2',
-        imagePath: 'assets/task2_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 4',
-        description: 'Description of Task 4',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 5',
-        description: 'Description of Task 5',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 6',
-        description: 'Description of Task 6',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 7',
-        description: 'Description of Task 7',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 8',
-        description: 'Description of Task 8',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 9',
-        description: 'Description of Task 9',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 10',
-        description: 'Description of Task 10',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-  ];
-  void _showUnarchiveDialog(BuildContext context,  task) {
+  bool isLoading = false;
+  final StreamController _streamController = StreamController();
+
+  @override
+  void initState() {
+    super.initState();
+    getArchivedTaskList();
+  }
+
+  void _showUnarchiveDialog(BuildContext context,taskId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -78,7 +45,7 @@ class _ArchivedTaskListState extends State<ArchivedTaskList> {
             ),
             TextButton(
               onPressed: () {
-                _unarchiveTask(task);
+                unArchiveTask(taskId);
                 Navigator.of(context).pop();
               },
               child: Text('Yes'),
@@ -88,10 +55,38 @@ class _ArchivedTaskListState extends State<ArchivedTaskList> {
       },
     );
   }
+  unArchiveTask(taskId) async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = APIData.archivedTask;
+    print(url);
 
-  taskElement({task, onPress, color}) {
+    var res = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    }, body: {
+      'id': taskId.toString(),
+      'archive': '0'
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      //  print(res.body);
+
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      setState(() {
+        isLoading = false;
+      });
+      Navigator.pushAndRemoveUntil(context,
+          MaterialPageRoute(builder: (context) => Home()), (route) => false);
+    }
+    return 'Success';
+  }
+
+  taskElement({taskName,taskDesc, onIconPress, color,onTap}) {
     return Card(
-      color:  Color.fromARGB(255, 175, 212, 247) ,
+      color: Color.fromARGB(255, 175, 212, 247),
       elevation: 2,
       child: ListTile(
         leading: Image.asset(
@@ -99,22 +94,49 @@ class _ArchivedTaskListState extends State<ArchivedTaskList> {
           width: 50,
           height: 50,
         ),
-        title: Text(task.name),
-        subtitle: Text(task.description),
+        title: Text(taskName),
+        subtitle: Text(taskDesc),
         trailing: IconButton(
           icon: Icon(Icons.unarchive),
-          onPressed: onPress,
+          onPressed: onIconPress,
         ),
-        onTap: onPress,
+        onTap: onTap,
       ),
     );
   }
 
   void _unarchiveTask(task) {
     setState(() {
-      archivedTasks.remove(task);
+     // archivedTasks.remove(task);
       // Add the unarchived task to a new list or perform any other actions as needed
     });
+  }
+
+  getArchivedTaskList() async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = APIData.archivedTaskListForUser;
+    print(url);
+
+    var res = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    }, body: {
+      'user_id': ServiceManager.userID
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      //  print(res.body);
+
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      _streamController.add(data['task']);
+      setState(() {
+        isLoading = false;
+      });
+    }
+    return 'Success';
   }
 
   @override
@@ -123,27 +145,40 @@ class _ArchivedTaskListState extends State<ArchivedTaskList> {
       appBar: AppBar(
         title: Text('Archived Tasks'),
       ),
-      body: ListView.builder(
-        itemCount: archivedTasks.length,
-        itemBuilder: (context, index) {
-          return taskElement(
-              task: archivedTasks[index],
-              onPress: () {
-                _showUnarchiveDialog(context, archivedTasks[index]);
-              });
+      body: StreamBuilder(
+          stream: _streamController.stream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              var snapData = snapshot.data;
 
-          // ListTile(
-          //   title: Text(archivedTasks[index]),
-          //   trailing: IconButton(
-          //     icon: Icon(Icons.unarchive),
-          //     onPressed: () {
-          //       _showUnarchiveDialog(context, archivedTasks[index]);
-          //     },
-          //   ),
-
-          // );
-        },
-      ),
+              return  snapData.isNotEmpty? Container(
+                height: MediaQuery.of(context).size.height,
+                decoration: kBackgroundDesign(context),
+                child: ListView.builder(
+                  itemCount: snapData.length,
+                  itemBuilder: (context, index) {
+                    return taskElement(
+                       taskName:snapData[index]['title'],
+                       taskDesc:snapData[index]['description'],
+                       
+                        onTap: (){ Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              TaskDetailsScreen(
+                                                isArchived: true,
+                                                  taskId: snapData[index]['id'])));},
+                        onIconPress: () {
+                          _showUnarchiveDialog(context,snapData[index]['id']);
+                        });
+                  },
+                ),
+              ):Center(child: Text("No archived task"),);
+            }
+            return Center(
+              child: LoadingIcon(),
+            );
+          }),
     );
   }
 }

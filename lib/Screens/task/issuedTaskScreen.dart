@@ -8,7 +8,9 @@ import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
 
 class IssuedTaskScreen extends StatefulWidget {
-  const IssuedTaskScreen({super.key});
+  bool? isAdmin;
+  
+   IssuedTaskScreen({super.key,this.isAdmin});
 
   @override
   State<IssuedTaskScreen> createState() => _IssuedTaskScreenState();
@@ -20,7 +22,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
   @override
   void initState() {
     super.initState();
-    getIssueList();
+    widget.isAdmin==true? getIssueList():getUserIssueList();
   }
 
   @override
@@ -88,6 +90,37 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
     }
     return 'Success';
   }
+  getUserIssueList() async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = "${APIData.getIssueForUser}/${ServiceManager.userID}";
+    print(url);
+
+    var res = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ${ServiceManager.tokenID}',
+      },
+    );
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      //for (var user in data) {
+      // _userList.add(user['name']);
+      //}
+
+      setState(() {
+        isLoading = false;
+      });
+
+      _streamController.add(data['data']);
+    }
+    return 'Success';
+  }
 
   resolveIssue(taskId) async {
     setState(() {
@@ -111,7 +144,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
         isLoading = false;
       });
 
-      _streamController.add(data['data']);
+     // _streamController.add(data['data']);
     }
     return 'Success';
   }
@@ -120,8 +153,8 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
-        "Total Issues",
+          title:  Text(
+       widget.isAdmin==true? "Total Issues":"My issues",
       )),
       body: StreamBuilder(
           stream: _streamController.stream,
@@ -129,7 +162,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
             if (snapshot.hasData) {
               var data = snapshot.data;
 
-              return Container(
+              return data.isNotEmpty? Container(
                 decoration: kBackgroundDesign(context),
                 child: ListView.builder(
                   itemCount: data.length,
@@ -147,7 +180,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
                                   style: kBoldStyle(),
                                 ),
                                 Text(
-                                  data[index]['get_task']['title'],
+                                 data[index]['get_task']==null?'': data[index]['get_task']['title'],
                                 ),
                               ],
                             ),
@@ -162,14 +195,14 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
                                 ),
                               ],
                             ),
-                            Row(
+                           widget.isAdmin==true? Row(
                               children: [
                                 Text("Created By:", style: kBoldStyle()),
                                 Text(
                                   data[index]['get_user']['name'],
                                 )
                               ],
-                            )
+                            ):Container()
                             // TextField(
                             //   readOnly: true,
                             //   controller: TextEditingController(
@@ -201,7 +234,9 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
                     );
                   },
                 ),
-              );
+              ):Container(
+                decoration: kBackgroundDesign(context),
+                child: Center(child: Text("No issue yet",style: kBoldStyle(),),));
             }
             return const Center(child: LoadingIcon());
           }),

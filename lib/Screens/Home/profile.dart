@@ -190,13 +190,13 @@ class _ProfileViewState extends State<ProfileView> {
                 decoration: blurCurveDecor(context),
                 child: Column(
                   children: [
-                    profileButton(
-                        Icons.currency_rupee_outlined, 'Salary Statement', () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SalaryStatement()));
-                    }),
+                    // profileButton(
+                    //     Icons.currency_rupee_outlined, 'Salary Statement', () {
+                    //   Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //           builder: (context) => SalaryStatement()));
+                    // }),
                     profileButton(Icons.receipt_long_outlined, 'Leave Report',
                         () {
                       Navigator.push(

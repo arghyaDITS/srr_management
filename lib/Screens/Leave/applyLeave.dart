@@ -49,7 +49,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
 
       print(data['data'][0]['leave_type']);
       // print(data['data']['leave_type']);
-      _leaveDescriptionController.text = data['data'][0]['leave_desc'];
+      _leaveDescriptionController.text = data['data'][0]['leave_desc']??'';
       _leaveType = data['data'][0]['leave_type'];
       _fromDate = DateTime.parse(data['data'][0]['from_date']);
       _toDate = DateTime.parse(data['data'][0]['to_date']);

@@ -1,75 +1,84 @@
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 
-class UserSelectionScreen extends StatefulWidget {
+class FileUploadScreen extends StatefulWidget {
   @override
-  _UserSelectionScreenState createState() => _UserSelectionScreenState();
+  _FileUploadScreenState createState() => _FileUploadScreenState();
 }
 
-class _UserSelectionScreenState extends State<UserSelectionScreen> {
-  List<String> selectedUsers = [];
-  List<String> allUsers = [
-    "User 1",
-    "User 2",
-    "User 3",
-    "User 4",
-    "User 5",
-    // Add more users as needed
-  ];
+class _FileUploadScreenState extends State<FileUploadScreen> {
+  File? _file;
 
-  String? selectedUser;
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc'],
+    );
+
+    if (result != null) {
+      setState(() {
+        _file = File(result.files.single.path!);
+      });
+    } else {
+      // User canceled the picker
+    }
+  }
+
+  Future<void> _uploadFile() async {
+    if (_file == null) {
+      // Show error message that no file is selected
+      return;
+    }
+
+    try {
+      String fileName = basename(_file!.path);
+      String apiUrl = 'YOUR_API_ENDPOINT_HERE';
+
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(
+          _file!.path,
+          filename: fileName,
+          contentType: MediaType('application', 'pdf'), // Change content type according to file type
+        ),
+      });
+
+      Response response = await Dio().post(apiUrl, data: formData);
+      
+      // Handle response according to your requirements
+
+    } catch (e) {
+      // Handle errors
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User Selection'),
+        title: Text('File Upload'),
       ),
-      body: Column(
-        children: [
-          SimpleAutoCompleteTextField(
-            key: GlobalKey<AutoCompleteTextFieldState<String>>(),
-            suggestions: allUsers,
-            decoration: const InputDecoration(
-              labelText: 'Search for a user',
-              border: OutlineInputBorder(),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _file != null
+                ? Text('Selected file: ${basename(_file!.path)}')
+                : Text('No file selected'),
+            ElevatedButton(
+              onPressed: _pickFile,
+              child: Text('Select File'),
             ),
-            textChanged: (text) {
-              selectedUser = text;
-            },
-            textSubmitted: (text) {
-              setState(() {
-                if (!selectedUsers.contains(text)) {
-                  selectedUsers.add(text);
-                }
-              });
-            },
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Selected Users:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: selectedUsers.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(selectedUsers[index]),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle),
-                    onPressed: () {
-                      setState(() {
-                        selectedUsers.removeAt(index);
-                      });
-                    },
-                  ),
-                );
-              },
+            ElevatedButton(
+              onPressed: _uploadFile,
+              child: Text('Upload File'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

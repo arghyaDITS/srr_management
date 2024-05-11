@@ -25,7 +25,7 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   String user = "Tony";
-  customContainer({height, width, color, text1, text2, onPress, fontsize}) {
+  customContainer({height, width, color, iconData, text2, onPress, fontsize}) {
     return GestureDetector(
       onTap: onPress,
       child: Container(
@@ -49,15 +49,17 @@ class _DashboardViewState extends State<DashboardView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    //textAlign: TextAlign.center,
-                    text1,
-                    style: TextStyle(
-                      fontSize: fontsize ?? 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black, // Color of the text
-                    ),
-                  ),
+                  Icon(iconData,
+                  color: Color.fromARGB(255, 81, 47, 129),),
+                  // Text(
+                  //   //textAlign: TextAlign.center,
+                  //   text1,
+                  //   style: TextStyle(
+                  //     fontSize: fontsize ?? 20,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Colors.black, // Color of the text
+                  //   ),
+                  // ),
                   Text(
                     //textAlign: TextAlign.center,
                     text2,
@@ -162,13 +164,13 @@ class _DashboardViewState extends State<DashboardView> {
                   customContainer(
                       height: 210.0,
                       width: 180.0,
-                      text1: "10",
+                      iconData: Icons.calendar_today,
                       text2: "Todays work!",
                       onPress: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>  UserSelectionScreen()));
+                                builder: (context) =>  InProgressTaskListScreen()));
                       }),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -176,7 +178,7 @@ class _DashboardViewState extends State<DashboardView> {
                       customContainer(
                           height: 100.0,
                           width: 130.0,
-                          text1: "34",
+                          iconData: Icons.task,
                           text2: "Total Task",
                           fontsize: 14.0,
                           onPress: () {
@@ -184,7 +186,7 @@ class _DashboardViewState extends State<DashboardView> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const TotalTaskList(
-                                          completed: "Total",
+                                          status: "Total",
                                         )));
                           }),
                       const SizedBox(
@@ -193,7 +195,7 @@ class _DashboardViewState extends State<DashboardView> {
                       customContainer(
                           height: 100.0,
                           width: 130.0,
-                          text1: "32",
+                          iconData: Icons.task_alt_sharp,
                           text2: "Completed",
                           fontsize: 14.0,
                           onPress: () {
@@ -201,7 +203,7 @@ class _DashboardViewState extends State<DashboardView> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const TotalTaskList(
-                                          completed: "Completed",
+                                          status: "Completed",
                                         )));
                           }),
                     ],
@@ -308,35 +310,46 @@ class _DashboardViewState extends State<DashboardView> {
                   smallContainer(
                       color: Colors.deepOrangeAccent,
                       text: "My Issues",
+                      isIcon: true,
+                      iconData: Icons.sync_problem_rounded,
+
                       onPress: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const TotalTaskList(
-                                      completed: "Total",
+                                builder: (context) =>  IssuedTaskScreen(
+                                      isAdmin: false,
                                     )));
                       },
                       quantity: '1'),
                   smallContainer(
                       color: const Color.fromARGB(255, 216, 124, 95),
                       text: "Issues",
+                      isIcon: true,
+                      iconData: Icons.report_problem,
                       onPress: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const IssuedTaskScreen()));
+                                     IssuedTaskScreen(isAdmin: true,)));
                       },
                       quantity: '3'),
                   smallContainer(
                       color: const Color.fromARGB(255, 192, 63, 23),
                       text: "In progress",
+                      isIcon: true,
+                      iconData: Icons.run_circle,
                       onPress: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    InProgressTaskListScreen()));
+                                    const TotalTaskList(
+                                          status: "In progress",
+                                        )
+                                    //InProgressTaskListScreen()
+                                    ));
                       },
                       quantity: '0'),
                 ],
@@ -350,6 +363,8 @@ class _DashboardViewState extends State<DashboardView> {
                   smallContainer(
                       color: const Color.fromARGB(255, 129, 80, 207),
                       text: "Apply Leave",
+                      isIcon: true,
+                      iconData: Icons.leave_bags_at_home,
                       onPress: () {
                         Navigator.push(
                             context,
@@ -359,8 +374,10 @@ class _DashboardViewState extends State<DashboardView> {
                       },
                       quantity: '1'),
                   smallContainer(
-                      color: const Color.fromARGB(255, 45, 66, 110),
+                      color: Color.fromARGB(255, 99, 137, 221),
                       text: "Review",
+                      isIcon: true,
+                      iconData: Icons.reviews,
                       onPress: () {
                         Navigator.push(
                             context,
@@ -371,6 +388,8 @@ class _DashboardViewState extends State<DashboardView> {
                   smallContainer(
                       color: const Color.fromARGB(255, 103, 52, 185),
                       text: "Archived",
+                      isIcon: true,
+                      iconData: Icons.archive_rounded,
                       onPress: () {
                         Navigator.push(
                             context,

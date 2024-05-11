@@ -17,7 +17,9 @@ class _HomeState extends State<Home> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const DashboardView(),
-    const TotalTaskList(completed: '',),
+    const TotalTaskList(
+      status: "Total",
+    ),
     const ProfileView(),
   ];
 
@@ -63,7 +65,10 @@ class _HomeState extends State<Home> {
                   //     )),
                 ),
                 centerTitle: true,
-                title: CircleAvatar(child: Image.asset('images/logo.jpg', height: 55),radius: 30,),
+                title: CircleAvatar(
+                  child: Image.asset('images/logo.jpg', height: 55),
+                  radius: 30,
+                ),
                 // title: Text('Astha Saloon'),
                 // actions: [
                 //   // if(ServiceManager.isAdmin != false)

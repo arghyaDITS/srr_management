@@ -12,6 +12,7 @@ import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/colors.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class AdminTaskList extends StatefulWidget {
   const AdminTaskList({Key? key}) : super(key: key);
@@ -26,6 +27,8 @@ class _AdminTaskListState extends State<AdminTaskList>
   bool isLoading = false;
   bool leaveResposed = false;
   late TabController controller;
+  double _rating = 0.0;
+  TextEditingController _reviewController = TextEditingController();
 
   String _selectedCategory = 'a';
   bool _isLoading = false;
@@ -80,8 +83,8 @@ class _AdminTaskListState extends State<AdminTaskList>
       print(res.body);
 
       var data = jsonDecode(res.body);
-      
-        getAllTaskData();
+
+      getAllTaskData();
     }
     return 'Success';
   }
@@ -100,6 +103,95 @@ class _AdminTaskListState extends State<AdminTaskList>
       });
     });
     // await getAllTaskData(_selectedCategory);
+  }
+
+  void _showReviewBottomSheet(BuildContext context, taskId, userId) {
+    double _rating = 0.0;
+    TextEditingController _reviewController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Add Review',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20.0),
+              RatingBar.builder(
+                initialRating: _rating,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemSize: 40.0,
+                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (rating) {
+                  _rating = rating;
+                },
+              ),
+              SizedBox(height: 20.0),
+              TextFormField(
+                controller: _reviewController,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  hintText: 'Write your review here...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: () {
+                  // Handle submission of rating and review
+                  print('Rating: $_rating');
+                  print('Review: ${_reviewController.text}');
+                  sendReview(
+                      taskId: taskId,
+                      userId: userId,
+                      rating: _rating,
+                      review: _reviewController.text);
+                  // Here you can implement logic to submit the rating and review
+                  Navigator.pop(context); // Close the bottom sheet
+                },
+                child: Text('Submit'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  sendReview({taskId, userId, rating, review}) async {
+    String url = APIData.reviewTaskbyAdmin;
+    print(url);
+
+    var res = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    }, body: {
+      'task_id': taskId.toString(),
+      'user_id':jsonEncode(userId),
+      'rating': rating.toString(),
+      'review': review,
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+
+      var data = jsonDecode(res.body);
+
+     // getAllTaskData();
+    }
+    return 'Success';
   }
 
   @override
@@ -194,40 +286,44 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w600)))),
-                                                  Row(
-                                                    children: [
-                                                      IconButton(
-                                                          onPressed: () {
-                                                            declinePopUp(
-                                                                context,
-                                                                "Delete",
-                                                                onClickYes: () {
-                                                              //--
-                                                              deleteTask(
-                                                                  data[index]
-                                                                      ['id']);
+                                                  data[index]['status'] !=
+                                                          'Completed'
+                                                      ? Row(
+                                                          children: [
+                                                            IconButton(
+                                                                onPressed: () {
+                                                                  declinePopUp(
+                                                                      context,
+                                                                      "Delete",
+                                                                      onClickYes:
+                                                                          () {
+                                                                    //--
+                                                                    deleteTask(data[
+                                                                            index]
+                                                                        ['id']);
 
-                                                              Navigator.pop(
-                                                                  context);
-                                                            });
-                                                          },
-                                                          icon: Icon(
-                                                              Icons.delete)),
-                                                      IconButton(
-                                                          onPressed: () {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            CreateTaskScreen(
-                                                                              taskId: data[index]['id'],
-                                                                            )));
-                                                          },
-                                                          icon:
-                                                              Icon(Icons.edit)),
-                                                    ],
-                                                  )
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  });
+                                                                },
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .delete)),
+                                                            IconButton(
+                                                                onPressed: () {
+                                                                  Navigator.push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                          builder: (context) => CreateTaskScreen(
+                                                                                taskId: data[index]['id'],
+                                                                              )));
+                                                                },
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .edit)),
+                                                          ],
+                                                        )
+                                                      : Container()
                                                 ],
                                               ),
                                               Row(
@@ -311,27 +407,29 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                     style: kBoldStyle(),
                                                   ),
                                                   Container(
-                                                      padding: EdgeInsets.all(
-                                                          4),
-                                                      color: data[index][
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              4),
+                                                      color: data[index]
+                                                                  [
                                                                   'priority'] ==
                                                               'high'
-                                                          ? Color.fromARGB(255,
-                                                              240, 134, 126)
-                                                          : data[index][
-                                                                      'priority'] ==
+                                                          ? const Color.fromARGB(
+                                                              255,
+                                                              240,
+                                                              134,
+                                                              126)
+                                                          : data[index]['priority'] ==
                                                                   'low'
                                                               ? const Color
                                                                   .fromARGB(255,
                                                                   109, 207, 112)
-                                                              : Color.fromARGB(
-                                                                  255,
-                                                                  190,
-                                                                  181,
-                                                                  96),
+                                                              : const Color
+                                                                  .fromARGB(255,
+                                                                  190, 181, 96),
                                                       child: Text(
                                                         data[index]['priority'],
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                             color:
                                                                 Colors.white),
                                                       ))
@@ -348,7 +446,59 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                     style: k14Text(),
                                                   )
                                                 ],
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  data[index]['status'] ==
+                                                          'Completed'
+                                                      ? ElevatedButton(
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                                backgroundColor: Color.fromARGB(255, 230, 191, 255),
+                                                            foregroundColor: const Color.fromARGB(255, 1, 35, 62), // Change this to the color you desire
+                                                          ),
+                                                          onPressed: () {
+                                                            print(data[index]
+                                                                    ['user_ids']);
+                                                            _showReviewBottomSheet(
+                                                                context,
+                                                                data[index]['id'],
+                                                                data[index]
+                                                                    ['user_ids']);
+                                                          },
+                                                          child: Text("Review"))
+                                                      : Container(),
+                                                ],
                                               )
+                                              // data[index]['status'] ==
+                                              //         'Completed'
+                                              //     ? RatingBar.builder(
+                                              //         initialRating: _rating,
+                                              //         minRating: 1,
+                                              //         direction:
+                                              //             Axis.horizontal,
+                                              //         allowHalfRating: true,
+                                              //         itemCount: 5,
+                                              //         itemSize: 40.0,
+                                              //         itemPadding:
+                                              //             const EdgeInsets
+                                              //                 .symmetric(
+                                              //                 horizontal: 4.0),
+                                              //         itemBuilder:
+                                              //             (context, _) =>
+                                              //                 const Icon(
+                                              //           Icons.star,
+                                              //           color: Colors.amber,
+                                              //         ),
+                                              //         onRatingUpdate: (rating) {
+                                              //           setState(() {
+                                              //             _rating = rating;
+                                              //             print(_rating);
+                                              //           });
+                                              //         },
+                                              //       )
+                                              //     : Container(),
                                             ],
                                           ),
                                         ),
@@ -357,7 +507,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                                   ),
                           ],
                         )
-                      : Center(
+                      : const Center(
                           child: LoadingIcon(),
                         ),
                 ),

@@ -5,6 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:srr_management/Screens/Home/home.dart';
+import 'package:srr_management/Screens/Leave/component/approvalPopUp.dart';
+import 'package:srr_management/Screens/task/totalTaskList.dart';
 import 'package:srr_management/components/buttons.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
@@ -15,7 +18,8 @@ import 'package:http/http.dart' as http;
 
 class TaskDetailsScreen extends StatefulWidget {
   int? taskId;
-  TaskDetailsScreen({super.key, this.taskId});
+  bool? isArchived;
+  TaskDetailsScreen({super.key, this.taskId, this.isArchived});
 
   @override
   State<TaskDetailsScreen> createState() => _TaskDetailsScreenState();
@@ -128,6 +132,35 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     return 'Success';
   }
 
+  archiveTask() async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = APIData.archivedTask;
+    print(url);
+
+    var res = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    }, body: {
+      'id': widget.taskId.toString(),
+      'archive': widget.isArchived==true?'0':'1'
+    });
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      //  print(res.body);
+
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      setState(() {
+        isLoading = false;
+      });
+      Navigator.pushAndRemoveUntil(context,
+          MaterialPageRoute(builder: (context) => Home()), (route) => false);
+    }
+    return 'Success';
+  }
+
   Future<void> _showIssueDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
@@ -148,7 +181,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               child: const Text('OK'),
               onPressed: () {
                 // Save the issue and close the dialog
-               // _saveIssue(context);
+                // _saveIssue(context);
                 createIssue(context);
               },
             ),
@@ -182,7 +215,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   children: [
                     Container(
                         decoration: kBackgroundDesign(context),
-                        height: MediaQuery.of(context).size.height,
+                        height: MediaQuery.of(context).size.height / 1.1,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                             padding: const EdgeInsets.only(
@@ -233,7 +266,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                                   8), // Adjust border radius as needed
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.grey.withOpacity(0.5),
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 4,
                                                   offset: const Offset(0,
@@ -252,17 +286,20 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                       height: 10,
                                     ),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Expanded(
                                           child: Container(
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
                                               color: Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.grey.withOpacity(0.5),
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 4,
                                                   offset: const Offset(0,
@@ -349,7 +386,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                             setState(() {
                                               _dropdownValue = newValue!;
                                             });
-                                            changeTaskStatus("started");
+                                            changeTaskStatus(_dropdownValue);
                                           },
                                           items: <String>[
                                             'Yet to start',
@@ -360,8 +397,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                             return DropdownMenuItem<String>(
                                               value: value,
                                               child: Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                      vertical: 8),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(vertical: 8),
                                                   width:
                                                       100, // Adjust the width as needed
                                                   alignment: Alignment.center,
@@ -393,8 +430,21 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                           ],
                                         ),
                                         IconButton(
-                                            onPressed: () {},
-                                            icon: Icon(Icons.archive))
+                                            onPressed: () {
+                                              declinePopUp(context,widget.isArchived==true?'Unarchive': "archive",
+                                                  onClickYes: () {
+                                                archiveTask();
+                                                //--
+                                                // deleteTask(
+                                                //     data[index]
+                                                //         ['id']);
+
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            icon: widget.isArchived == true
+                                                ? Icon(Icons.unarchive)
+                                                : Icon(Icons.archive))
                                       ],
                                     ),
                                   ],

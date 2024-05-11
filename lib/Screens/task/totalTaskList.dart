@@ -14,8 +14,8 @@ import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
 
 class TotalTaskList extends StatefulWidget {
-  final String completed;
-  const TotalTaskList({super.key, required this.completed});
+  final String status;
+  const TotalTaskList({super.key, required this.status});
 
   @override
   State<TotalTaskList> createState() => _TotalTaskListState();
@@ -24,64 +24,13 @@ class TotalTaskList extends StatefulWidget {
 class _TotalTaskListState extends State<TotalTaskList> {
   final StreamController _streamController = StreamController();
 
-  final List<Task> tasks = [
-    Task(
-        name: 'Task 1',
-        description: 'Description of Task 1',
-        imagePath: 'assets/task1_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 2',
-        description: 'Description of Task 2',
-        imagePath: 'assets/task2_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: true),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-    Task(
-        name: 'Task 3',
-        description: 'Description of Task 3',
-        imagePath: 'assets/task3_image.jpg',
-        isDone: false),
-  ];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(ServiceManager.userID.toString());
+    print(widget.status);
     getUserTotalTaskData();
+
   }
 
   @override
@@ -93,9 +42,9 @@ class _TotalTaskListState extends State<TotalTaskList> {
 
   taskElement({taskName, desc, status, color, onPress}) {
     return Card(
-      color: status == 'pending' || status == 'yet to start'
-          ?Colors.white
-          :  const Color.fromARGB(255, 197, 198, 199),
+      color: status !='Completed'
+          ? Colors.white
+          : const Color.fromARGB(255, 197, 198, 199),
       elevation: 2,
       child: ListTile(
         leading: Image.asset(
@@ -124,7 +73,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
       'Accept': 'application/json',
       'Authorization': 'Bearer ${ServiceManager.tokenID}',
     }, body: {
-      'user_id': 23.toString() //ServiceManager.userID
+      'user_id':ServiceManager.userID
     });
     print(res.statusCode);
     if (res.statusCode == 200) {
@@ -141,17 +90,27 @@ class _TotalTaskListState extends State<TotalTaskList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tasks'),
+        title:Text( widget.status=='Completed' ?'Completed Task':'My Total Tasks'),
       ),
       body: StreamBuilder(
           stream: _streamController.stream,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              var data = snapshot.data;
-              print(data.toString());
-              print(data.length);
+              var snapData = snapshot.data;
+              // print(data.toString());
+              // print(data.length);
+              List data = [];
+              if (widget.status==null||widget.status=='Total') {
+                data = snapData;
+              } else {
+                for (var item in snapData) {
+                  if (item['status'] == widget.status) {
+                    data.add(item);
+                  }
+                }
+              }
 
-              return Container(
+              return data.isNotEmpty? Container(
                 height: MediaQuery.of(context).size.height,
                 decoration: kBackgroundDesign(context),
                 child: SingleChildScrollView(
@@ -165,23 +124,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
                         return Container(height: 10, color: Colors.transparent);
                       },
                       itemBuilder: (context, index) {
-                        return widget.completed == 'Completed'
-                            ? data[index]['status'] == 'pending' ||
-                                    data[index]['yet to start']
-                                ? taskElement(
-                                    taskName: data[index]['title'],
-                                    desc: data[index]['description'],
-                                    status: data[index]['status'],
-                                    onPress: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                   TaskDetailsScreen(taskId:  data[index]['id'])));
-                                    },
-                                  )
-                                : Container()
-                            : taskElement(
+                        return taskElement(
                                 taskName: data[index]['title'],
                                 desc: data[index]['description'],
                                 status: data[index]['status'],
@@ -190,7 +133,8 @@ class _TotalTaskListState extends State<TotalTaskList> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                               TaskDetailsScreen(taskId:  data[index]['id'])));
+                                              TaskDetailsScreen(
+                                                  taskId: data[index]['id'])));
                                 },
                               );
                       },
@@ -200,7 +144,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
                     )
                   ],
                 )),
-              );
+              ):Center(child: Text("No task to show"),);
             }
             return const Center(child: LoadingIcon());
           }),
