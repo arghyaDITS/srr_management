@@ -45,7 +45,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final List<int> _userIdList = [];
   List assignedUserId = [];
   List<Users> selectedUsers = [];
-
+  List assignedUserIdList = [];
   late String _filePath; // Variable to store the path of the selected file
   String? selectedUser;
   late List<int> selectedUserIds =
@@ -59,6 +59,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     widget.taskId != null ? getTaskData() : null;
     getUserList();
     selectedUserIds = [];
+   
   }
 
   // void _openFileExplorer() async {
@@ -209,6 +210,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       print(res.body);
 
       var data = jsonDecode(res.body);
+      
       _titleController.text = data['task']['title'];
       _descriptionController.text = data['task']['description'];
       _startDate = DateTime.parse(data['task']['start_date']);
@@ -219,6 +221,22 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ? "Low"
               : "Medium";
       category = data['task']['category_id'];
+     var idList =data['task']['user_ids'];
+     print(idList);
+     assignedUserIdList = idList.map((id) => int.parse(id)).toList();
+      print(assignedUserIdList);
+       if (widget.taskId != null) {
+      for (int userId in assignedUserIdList) {
+        int index = _userIdList.indexOf(userId);
+        if (index != -1) {
+          selectedUsers.add(Users(name: _userList[index], id: userId));
+        }
+      }
+      print("**************");
+      print(selectedUsers[0].name);
+      print(assignedUserIdList.length);
+      print("**************");
+    }
 
       setState(() {
         isLoading = false;
@@ -236,6 +254,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         SimpleAutoCompleteTextField(
           key: GlobalKey<AutoCompleteTextFieldState<String>>(),
           suggestions: _userList, //allUsers,
+
           decoration: const InputDecoration(
             labelText: 'Assign member',
             border: OutlineInputBorder(),
@@ -289,6 +308,21 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         ),
       ],
     );
+  }
+
+  String _getInitialUserValue() {
+    // Function to get initial value based on user IDs
+    // Look for selected user IDs in the list of users
+    // and return the corresponding user names
+    List<String> initialNames = [];
+    for (int userId in assignedUserIdList) {
+      int index = _userIdList.indexOf(userId);
+      if (index != -1) {
+        initialNames.add(_userList[index]);
+      }
+    }
+    // Join the user names into a single string separated by commas
+    return initialNames.join(', ');
   }
 
   void updateSelectedUserIds() {
@@ -410,29 +444,29 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                   // ),
                   //__________________________________________________________
                   //userField(),
-                  const SizedBox(height: 16.0),
-                  isMoreMember
-                      ? DropdownButtonFormField<String>(
-                          value: _selectedUser2 != '' ? _selectedUser2 : null,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedUser2 = value!;
-                              //  isMoreMember=false;
-                            });
-                          },
-                          items: _userList
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Select Category',
-                          ),
-                        )
-                      : Container(),
+                  //const SizedBox(height: 16.0),
+                  // isMoreMember
+                  //     ? DropdownButtonFormField<String>(
+                  //         value: _selectedUser2 != '' ? _selectedUser2 : null,
+                  //         onChanged: (value) {
+                  //           setState(() {
+                  //             _selectedUser2 = value!;
+                  //             //  isMoreMember=false;
+                  //           });
+                  //         },
+                  //         items: _userList
+                  //             .map<DropdownMenuItem<String>>((String value) {
+                  //           return DropdownMenuItem<String>(
+                  //             value: value,
+                  //             child: Text(value),
+                  //           );
+                  //         }).toList(),
+                  //         decoration: const InputDecoration(
+                  //           border: OutlineInputBorder(),
+                  //           labelText: 'Select Category',
+                  //         ),
+                  //       )
+                  //     : Container(),
 
                   const SizedBox(height: 10),
 
@@ -549,10 +583,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         print("yes");
                         widget.taskId != null
                             ? editTask()
-                            :
-                            _filePath==''?postTask():
-                             await postTaskwithFile(
-                                file: _filePath != '' ? File(_filePath) : null);
+                            : _filePath == ''
+                                ? postTask()
+                                : await postTaskwithFile(
+                                    file: _filePath != ''
+                                        ? File(_filePath)
+                                        : null);
                       } else {
                         print("No");
                         ScaffoldMessenger.of(context).showSnackBar(

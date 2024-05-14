@@ -92,62 +92,65 @@ class _TotalTaskListState extends State<TotalTaskList> {
       appBar: AppBar(
         title:Text( widget.status=='Completed' ?'Completed Task':'My Total Tasks'),
       ),
-      body: StreamBuilder(
-          stream: _streamController.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              var snapData = snapshot.data;
-              // print(data.toString());
-              // print(data.length);
-              List data = [];
-              if (widget.status==null||widget.status=='Total') {
-                data = snapData;
-              } else {
-                for (var item in snapData) {
-                  if (item['status'] == widget.status) {
-                    data.add(item);
+      body: Container(
+        decoration: kBackgroundDesign(context),
+        child: StreamBuilder(
+            stream: _streamController.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var snapData = snapshot.data;
+                // print(data.toString());
+                // print(data.length);
+                List data = [];
+                if (widget.status==null||widget.status=='Total') {
+                  data = snapData;
+                } else {
+                  for (var item in snapData) {
+                    if (item['status'] == widget.status) {
+                      data.add(item);
+                    }
                   }
                 }
+        
+                return data.isNotEmpty? Container(
+                  height: MediaQuery.of(context).size.height,
+                  decoration: kBackgroundDesign(context),
+                  child: SingleChildScrollView(
+                      child: Column(
+                    children: [
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: data.length,
+                        separatorBuilder: (BuildContext context, int index) {
+                          return Container(height: 10, color: Colors.transparent);
+                        },
+                        itemBuilder: (context, index) {
+                          return taskElement(
+                                  taskName: data[index]['title'],
+                                  desc: data[index]['description'],
+                                  status: data[index]['status'],
+                                  onPress: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                TaskDetailsScreen(
+                                                    taskId: data[index]['id'])));
+                                  },
+                                );
+                        },
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.height / 2,
+                      )
+                    ],
+                  )),
+                ):Center(child: Text("No task to show"),);
               }
-
-              return data.isNotEmpty? Container(
-                height: MediaQuery.of(context).size.height,
-                decoration: kBackgroundDesign(context),
-                child: SingleChildScrollView(
-                    child: Column(
-                  children: [
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: data.length,
-                      separatorBuilder: (BuildContext context, int index) {
-                        return Container(height: 10, color: Colors.transparent);
-                      },
-                      itemBuilder: (context, index) {
-                        return taskElement(
-                                taskName: data[index]['title'],
-                                desc: data[index]['description'],
-                                status: data[index]['status'],
-                                onPress: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              TaskDetailsScreen(
-                                                  taskId: data[index]['id'])));
-                                },
-                              );
-                      },
-                    ),
-                    Container(
-                      height: MediaQuery.of(context).size.height / 2,
-                    )
-                  ],
-                )),
-              ):Center(child: Text("No task to show"),);
-            }
-            return const Center(child: LoadingIcon());
-          }),
+              return const Center(child: LoadingIcon());
+            }),
+      ),
     );
   }
 }

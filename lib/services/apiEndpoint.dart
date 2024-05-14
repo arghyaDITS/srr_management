@@ -47,6 +47,9 @@ class APIData {
   static const String userWiseLeave = '${baseURL}api/userWiseLeave';
   static const String userSingleLeave = '${baseURL}api/user_wise_leave_with_id';
 
+  static const String leaveReportForUser = '${baseURL}api/get_leave_report';
+  
+
   //notes Api
   static const String postNote = '${baseURL}api/saveNotes';
 

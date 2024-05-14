@@ -144,7 +144,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       'Authorization': 'Bearer ${ServiceManager.tokenID}',
     }, body: {
       'id': widget.taskId.toString(),
-      'archive': widget.isArchived==true?'0':'1'
+      'archive': widget.isArchived == true ? '0' : '1'
     });
     print(res.statusCode);
     if (res.statusCode == 200) {
@@ -378,11 +378,14 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                           "Select task Status:",
                                           style: kBoldStyle(),
                                         ),
+                                        IgnorePointer(
+                                          ignoring: data['status']=='Completed',
+                                          child: 
                                         DropdownButton<String>(
                                           value: _dropdownValue != ''
                                               ? _dropdownValue
                                               : null,
-                                          onChanged: (String? newValue) {
+                                          onChanged:(String? newValue) {
                                             setState(() {
                                               _dropdownValue = newValue!;
                                             });
@@ -405,7 +408,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                                   child: Text(value)),
                                             );
                                           }).toList(),
-                                        ),
+                                        )),
                                       ],
                                     ),
                                     const Spacer(),
@@ -413,38 +416,48 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            const Text(
-                                                textScaleFactor:
-                                                    0.8, // Adjust the scaling factor as needed
-                                                overflow: TextOverflow.ellipsis,
-                                                "Having Issue, Raise Flag!"),
-                                            IconButton(
-                                              icon: const Icon(Icons.flag),
-                                              color: Colors.red,
-                                              onPressed: () {
-                                                _showIssueDialog(context);
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                        IconButton(
-                                            onPressed: () {
-                                              declinePopUp(context,widget.isArchived==true?'Unarchive': "archive",
-                                                  onClickYes: () {
-                                                archiveTask();
-                                                //--
-                                                // deleteTask(
-                                                //     data[index]
-                                                //         ['id']);
+                                        data['status']=='Completed'
+                                            ? Container()
+                                            : Row(
+                                                children: [
+                                                  const Text(
+                                                      textScaleFactor:
+                                                          0.8, // Adjust the scaling factor as needed
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      "Having Issue, Raise Flag!"),
+                                                  IconButton(
+                                                    icon:
+                                                        const Icon(Icons.flag),
+                                                    color: Colors.red,
+                                                    onPressed: () {
+                                                      _showIssueDialog(context);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                       data['status']=='Completed'
+                                            ? Container()
+                                            : IconButton(
+                                                onPressed: () {
+                                                  declinePopUp(
+                                                      context,
+                                                      widget.isArchived == true
+                                                          ? 'Unarchive'
+                                                          : "archive",
+                                                      onClickYes: () {
+                                                    archiveTask();
+                                                    //--
+                                                    // deleteTask(
+                                                    //     data[index]
+                                                    //         ['id']);
 
-                                                Navigator.pop(context);
-                                              });
-                                            },
-                                            icon: widget.isArchived == true
-                                                ? Icon(Icons.unarchive)
-                                                : Icon(Icons.archive))
+                                                    Navigator.pop(context);
+                                                  });
+                                                },
+                                                icon: widget.isArchived == true
+                                                    ? Icon(Icons.unarchive)
+                                                    : Icon(Icons.archive))
                                       ],
                                     ),
                                   ],

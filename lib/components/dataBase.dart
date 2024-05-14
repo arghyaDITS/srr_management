@@ -251,8 +251,7 @@ List<String> genderList = [
 
 List<String> maritalList = [
   'Married',
-  'Unmarried',
-  'Widow',
+  'Unmarried'
 ];
 
 List<String> bloodGroupList = [

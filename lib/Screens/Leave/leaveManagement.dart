@@ -94,25 +94,31 @@ class _LeaveManagementState extends State<LeaveManagement>
           ),
         ),
         body: isLoading == false
-            ? StreamBuilder(
-                stream: _streamController.stream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    var data = snapshot.data;
-                    if (data.length > 0) {
-                      return TabBarView(controller: controller, children: [
-                        leaveManageMentBody(data, 0),
-                        leaveManageMentBody(data, 1),
-                        leaveManageMentBody(data, 2)
-                      ]);
-                    } else {
-                      const Center(
-                        child: Text("No Data"),
-                      );
+            ? Container(
+              decoration: kBackgroundDesign(context),
+              child: StreamBuilder(
+                  stream: _streamController.stream,
+                  builder: (context, snapshot) {
+                    print(snapshot.hasData.toString());
+                    if (snapshot.hasData) {
+                      var data = snapshot.data;
+                      if (data.length > 0) {
+                        return TabBarView(controller: controller, children: [
+                          leaveManageMentBody(data, 0),
+                          leaveManageMentBody(data, 1),
+                          leaveManageMentBody(data, 2)
+                        ]);
+                      } else {
+                        const Center(
+                          child: Text("No Data"),
+                        );
+                      }
                     }
-                  }
-                  return const LoadingIcon();
-                })
+                    return Center(
+                      child: Text("No Data"),
+                    );
+                  }),
+            )
             : const LoadingIcon());
   }
 
@@ -190,17 +196,14 @@ class _LeaveManagementState extends State<LeaveManagement>
                                         : data[index]['status'] == 1
                                             ? 'Accepted'
                                             : 'Declined',
-                                    style:  TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 17,
-                                        color:
-                                            data[index]['status'] == 0
-                                            ?
-                                            Color.fromARGB(255, 241, 221, 37)
-                                        : data[index]['status'] == 1
-                                            ? Colors.green
-                                            : Colors.red
-                                        ),
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 17,
+                                        color: data[index]['status'] == 0
+                                            ? Color.fromARGB(255, 241, 221, 37)
+                                            : data[index]['status'] == 1
+                                                ? Colors.green
+                                                : Colors.red),
                                   ),
                                 ],
                               ),
@@ -257,7 +260,8 @@ class _LeaveManagementState extends State<LeaveManagement>
                               children: [
                                 TextButton(
                                   onPressed: () {
-                                    declinePopUp(context, "Decline", onClickYes: () {
+                                    declinePopUp(context, "Decline",
+                                        onClickYes: () {
                                       sendLeaveApproval(
                                           data[index]['id'].toString(), 2);
                                       Navigator.pop(context);
@@ -267,7 +271,8 @@ class _LeaveManagementState extends State<LeaveManagement>
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    declinePopUp(context, "Approve", onClickYes: () {
+                                    declinePopUp(context, "Approve",
+                                        onClickYes: () {
                                       sendLeaveApproval(
                                           data[index]['id'].toString(), 1);
                                       Navigator.pop(context);

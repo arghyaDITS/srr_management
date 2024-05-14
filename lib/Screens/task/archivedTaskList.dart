@@ -145,40 +145,43 @@ class _ArchivedTaskListState extends State<ArchivedTaskList> {
       appBar: AppBar(
         title: Text('Archived Tasks'),
       ),
-      body: StreamBuilder(
-          stream: _streamController.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              var snapData = snapshot.data;
-
-              return  snapData.isNotEmpty? Container(
-                height: MediaQuery.of(context).size.height,
-                decoration: kBackgroundDesign(context),
-                child: ListView.builder(
-                  itemCount: snapData.length,
-                  itemBuilder: (context, index) {
-                    return taskElement(
-                       taskName:snapData[index]['title'],
-                       taskDesc:snapData[index]['description'],
-                       
-                        onTap: (){ Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              TaskDetailsScreen(
-                                                isArchived: true,
-                                                  taskId: snapData[index]['id'])));},
-                        onIconPress: () {
-                          _showUnarchiveDialog(context,snapData[index]['id']);
-                        });
-                  },
-                ),
-              ):Center(child: Text("No archived task"),);
-            }
-            return Center(
-              child: LoadingIcon(),
-            );
-          }),
+      body: Container(
+        decoration: kBackgroundDesign(context),
+        child: StreamBuilder(
+            stream: _streamController.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var snapData = snapshot.data;
+        
+                return  snapData.isNotEmpty? Container(
+                  height: MediaQuery.of(context).size.height,
+                  decoration: kBackgroundDesign(context),
+                  child: ListView.builder(
+                    itemCount: snapData.length,
+                    itemBuilder: (context, index) {
+                      return taskElement(
+                         taskName:snapData[index]['title'],
+                         taskDesc:snapData[index]['description'],
+                         
+                          onTap: (){ Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                TaskDetailsScreen(
+                                                  isArchived: true,
+                                                    taskId: snapData[index]['id'])));},
+                          onIconPress: () {
+                            _showUnarchiveDialog(context,snapData[index]['id']);
+                          });
+                    },
+                  ),
+                ):Center(child: Text("No archived task"),);
+              }
+              return Center(
+                child: LoadingIcon(),
+              );
+            }),
+      ),
     );
   }
 }

@@ -5,7 +5,7 @@ import 'package:srr_management/Screens/Auth/login.dart';
 import 'package:srr_management/Screens/Leave/myLeave.dart';
 import 'package:srr_management/Screens/profile/aboutUs.dart';
 import 'package:srr_management/Screens/profile/editProfile.dart';
-import 'package:srr_management/Screens/profile/leavdeReport.dart';
+import 'package:srr_management/Screens/profile/leaveReport.dart';
 import 'package:srr_management/Screens/profile/myDocument.dart';
 import 'package:srr_management/Screens/profile/salaryStateMent.dart';
 import 'package:srr_management/Screens/profile/termsAndService.dart';
@@ -92,7 +92,7 @@ class _ProfileViewState extends State<ProfileView> {
       builder: (BuildContext context) => AlertDialog(
         actionsAlignment: MainAxisAlignment.spaceEvenly,
         title: Text('Logout', style: kHeaderStyle()),
-        content: Text('Are you sure you want to logout?'),
+        content: const Text('Are you sure you want to logout?'),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -115,41 +115,42 @@ class _ProfileViewState extends State<ProfileView> {
         backgroundColor: Colors.transparent,
         body: SingleChildScrollView(
           controller: _scrollController,
-          physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 15),
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             children: [
-              SizedBox(height: kToolbarHeight),
+              const SizedBox(height: kToolbarHeight),
               Column(
                 children: [
                   Stack(
                     children: [
                       Column(
                         children: [
-                          SizedBox(height: 120),
+                          const SizedBox(height: 90),
                           Container(
-                            padding: EdgeInsets.all(15),
+                            padding: const EdgeInsets.all(15),
                             decoration: blurCurveDecor(context),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Row(),
+                                const Row(),
                                 Text("${ServiceManager.userName}", style: kHeaderStyle()),
-                                Text("designation"),
+                              
                               ],
                             ),
                           ),
                         ],
                       ),
+                     
                       CircleAvatar(
-                          radius: 70,
+                          radius: 50,
                           backgroundColor:
                               Theme.of(context).scaffoldBackgroundColor !=
                                       Colors.black
                                   ? kMainColor
                                   : kDarkColor,
-                          child: CircleAvatar(
-                            radius: 65,
+                          child: const CircleAvatar(
+                            radius: 45,
                             backgroundImage:
                                 AssetImage('images/img_blank_profile.png'),
                           )),
@@ -157,7 +158,7 @@ class _ProfileViewState extends State<ProfileView> {
                   ),
                 ],
               ),
-              SizedBox(height: 10.0),
+              const SizedBox(height: 10.0),
               Container(
                 decoration: blurCurveDecor(context),
                 child: Column(
@@ -166,7 +167,7 @@ class _ProfileViewState extends State<ProfileView> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => EditProfile()));
+                              builder: (context) => const EditProfile()));
                     }),
                   ],
                 ),
@@ -259,7 +260,7 @@ class _ProfileViewState extends State<ProfileView> {
                       ServiceManager().removeAll();
                       Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => Login()),
+                          MaterialPageRoute(builder: (context) => const Login()),
                           (route) => false);
                     } catch (e) {
                       setState(() {

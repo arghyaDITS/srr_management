@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:srr_management/Screens/Leave/component/approvalPopUp.dart';
 import 'package:srr_management/Screens/task/createTask.dart';
 import 'package:srr_management/Screens/task/editTask.dart';
+import 'package:srr_management/Screens/task/model/userModel.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
@@ -32,11 +33,17 @@ class _AdminTaskListState extends State<AdminTaskList>
 
   String _selectedCategory = 'a';
   bool _isLoading = false;
+  final List<String> _userList = [];
+  final List<int> _userIdList = [];
+  List assignedUserId = [];
+  List<Users> selectedUsers = [];
+  List assignedUserIdList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    getUserList();
     getAllTaskData();
   }
 
@@ -45,6 +52,40 @@ class _AdminTaskListState extends State<AdminTaskList>
     // TODO: implement dispose
     super.dispose();
     _streamController.close();
+  }
+
+  getUserList() async {
+    setState(() {
+      isLoading = true;
+    });
+    String url = APIData.getUserList;
+    print(url);
+
+    var res = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ${ServiceManager.tokenID}',
+      },
+    );
+    print(res.statusCode);
+    if (res.statusCode == 200) {
+      print(res.body);
+
+      var data = jsonDecode(res.body);
+      print(data.toString());
+      for (var user in data) {
+        _userList.add(user['name']);
+        _userIdList.add(user['id']);
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+
+      //   _streamController.add(data['task']);
+    }
+    return 'Success';
   }
 
   getAllTaskData() async {
@@ -179,7 +220,7 @@ class _AdminTaskListState extends State<AdminTaskList>
       'Authorization': 'Bearer ${ServiceManager.tokenID}',
     }, body: {
       'task_id': taskId.toString(),
-      'user_id':jsonEncode(userId),
+      'user_id': jsonEncode(userId),
       'rating': rating.toString(),
       'review': review,
     });
@@ -189,7 +230,7 @@ class _AdminTaskListState extends State<AdminTaskList>
 
       var data = jsonDecode(res.body);
 
-     // getAllTaskData();
+      // getAllTaskData();
     }
     return 'Success';
   }
@@ -212,6 +253,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                   data.add(item);
                 }
               }
+
               return Container(
                 decoration: kBackgroundDesign(context),
                 height: MediaQuery.of(context).size.height,
@@ -262,6 +304,29 @@ class _AdminTaskListState extends State<AdminTaskList>
                                       return const SizedBox(height: 15);
                                     },
                                     itemBuilder: (context, index) {
+                                      //--------------------------------------------------------------Assigned user
+                                      // assignedUserIdList = data[index]
+                                      //         ['user_ids']
+                                      //     .map((id) => int.parse(id))
+                                      //     .toSet()
+                                      //     .toList();
+                                      // List<int> uniqueUserIdList = [];
+                                      // for (int userId in assignedUserIdList) {
+                                      //   if (!uniqueUserIdList
+                                      //       .contains(userId)) {
+                                      //     uniqueUserIdList.add(userId);
+                                      //   }
+                                      // }
+                                      // for (int userId in uniqueUserIdList) {
+                                      //   int index = _userIdList.indexOf(userId);
+                                      //   if (index != -1) {
+                                      //     selectedUsers.add(Users(
+                                      //         name: _userList[index],
+                                      //         id: userId));
+                                      //   }
+                                      // }
+                                   
+                                      //--------------------------------------------------------------Assigned user
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10.0, vertical: 5.0),
@@ -273,6 +338,15 @@ class _AdminTaskListState extends State<AdminTaskList>
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
+                                              //  Text(selectedUsers[0].name),
+                                              // for (var index = 0;
+                                              //     index < selectedUsers.length;
+                                              //     index++)
+                                              //   selectedUsers.isNotEmpty
+                                              //       ? Text(
+                                              //           "id::${selectedUsers[index].id}")
+                                              //       : Container(),
+
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
@@ -447,25 +521,64 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                   )
                                                 ],
                                               ),
+                                              // Row(
+                                              //   children: [
+                                              //     Text(
+                                              //       "User IDs: ",
+                                              //       style: kBoldStyle(),
+                                              //     ),
+                                              //     Text(
+                                              //       data[index]['user_ids']
+                                              //           .join(", "),
+                                              //       style: k14Text(),
+                                              //     )
+                                              //   ],
+                                              // ),
+                                               Row(
+                                                children: [
+                                                  Text(
+                                                    "Assigned members: ",
+                                                    style: kBoldStyle(),
+                                                  ),
+                                                  Text(
+                                                    data[index]['user_name']
+                                                        .join(", "),
+                                                    style: k14Text(),
+                                                  )
+                                                ],
+                                              ),
                                               Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
                                                 children: [
                                                   data[index]['status'] ==
                                                           'Completed'
                                                       ? ElevatedButton(
                                                           style: ElevatedButton
                                                               .styleFrom(
-                                                                backgroundColor: Color.fromARGB(255, 230, 191, 255),
-                                                            foregroundColor: const Color.fromARGB(255, 1, 35, 62), // Change this to the color you desire
+                                                            backgroundColor:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    230,
+                                                                    191,
+                                                                    255),
+                                                            foregroundColor:
+                                                                const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    1,
+                                                                    35,
+                                                                    62), // Change this to the color you desire
                                                           ),
                                                           onPressed: () {
                                                             print(data[index]
-                                                                    ['user_ids']);
+                                                                ['user_ids']);
                                                             _showReviewBottomSheet(
                                                                 context,
-                                                                data[index]['id'],
                                                                 data[index]
-                                                                    ['user_ids']);
+                                                                    ['id'],
+                                                                data[index][
+                                                                    'user_ids']);
                                                           },
                                                           child: Text("Review"))
                                                       : Container(),
