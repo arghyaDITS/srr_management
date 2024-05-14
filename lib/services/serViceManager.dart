@@ -79,7 +79,7 @@ class ServiceManager {
       print(data.toString());
       userName = '${data['user']['name']}';
       userEmail = '${data['user']['email']}';
-      profileURL = '${data['user']['photo']}';
+      profileURL = '${data['user']['profile_image']}';
       userMobile = data['user']['mobile'] ?? '';
       userAltMobile = data['user']['alternative_mob'] ?? '';
       userDob = data['user']['dob'] ?? '';

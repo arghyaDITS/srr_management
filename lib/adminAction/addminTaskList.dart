@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -31,7 +32,7 @@ class _AdminTaskListState extends State<AdminTaskList>
   double _rating = 0.0;
   TextEditingController _reviewController = TextEditingController();
 
-  String _selectedCategory = 'a';
+  String _selectedCategory = 'Logistic';
   bool _isLoading = false;
   final List<String> _userList = [];
   final List<int> _userIdList = [];
@@ -262,6 +263,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
+                            Text("Select Category:",style: kBoldStyle(),),
                             Container(
                               padding: const EdgeInsets.all(10.0),
                               decoration: BoxDecoration(
@@ -276,12 +278,12 @@ class _AdminTaskListState extends State<AdminTaskList>
                                   color: Colors.transparent,
                                 ),
                                 onChanged: _onCategoryChanged,
-                                items: <String>['a', 'b', 'c', 'd']
+                                items: <String>['Logistic', 'Office', 'Admin', 'Tender']
                                     .map((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(
-                                      'Select category: $value',
+                                      '$value',
                                       style: kHeaderStyle(
                                           color: const Color.fromARGB(
                                               255, 4, 55, 97)),
@@ -540,13 +542,15 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                     "Assigned members: ",
                                                     style: kBoldStyle(),
                                                   ),
-                                                  Text(
-                                                    data[index]['user_name']
-                                                        .join(", "),
-                                                    style: k14Text(),
+                                                  Expanded(
+                                                    child: Text(
+                                                      data[index]['user_name']
+                                                          .join(", "),
+                                                      style: k14Text(),
+                                                    ),
                                                   )
                                                 ],
-                                              ),
+                                                                                             ),
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,

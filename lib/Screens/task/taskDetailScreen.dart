@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:srr_management/Screens/Home/home.dart';
 import 'package:srr_management/Screens/Leave/component/approvalPopUp.dart';
 import 'package:srr_management/Screens/task/totalTaskList.dart';
@@ -156,7 +159,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         isLoading = false;
       });
       Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (context) => Home()), (route) => false);
+          MaterialPageRoute(builder: (context) => const Home()), (route) => false);
     }
     return 'Success';
   }
@@ -195,6 +198,37 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     // Here you can handle saving the issue, for now let's just print it
     print('Issue: $issue');
     Navigator.of(context).pop(); // Close the dialog
+  }
+
+  Future<void> downloadAndOpenPDF(docUrl) async {
+    final String url = docUrl; // Sample PDF URL
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final Directory appDocDir = await getApplicationDocumentsDirectory();
+      final String appDocPath = appDocDir.path;
+      final File file = File('$appDocPath/example.pdf');
+      await file.writeAsBytes(response.bodyBytes);
+
+      // Open the downloaded PDF file using the default PDF viewer
+      try {
+        await OpenFile.open('$appDocPath/example.pdf');
+      } catch (e) {
+        print('Error opening PDF: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error opening PDF'),
+          ),
+        );
+      }
+    } else {
+      print('Failed to download PDF');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to download PDF'),
+        ),
+      );
+    }
   }
 
   @override
@@ -379,44 +413,69 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                           style: kBoldStyle(),
                                         ),
                                         IgnorePointer(
-                                          ignoring: data['status']=='Completed',
-                                          child: 
-                                        DropdownButton<String>(
-                                          value: _dropdownValue != ''
-                                              ? _dropdownValue
-                                              : null,
-                                          onChanged:(String? newValue) {
-                                            setState(() {
-                                              _dropdownValue = newValue!;
-                                            });
-                                            changeTaskStatus(_dropdownValue);
-                                          },
-                                          items: <String>[
-                                            'Yet to start',
-                                            'Completed',
-                                            'In Progress'
-                                          ].map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                            return DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(vertical: 8),
-                                                  width:
-                                                      100, // Adjust the width as needed
-                                                  alignment: Alignment.center,
-                                                  child: Text(value)),
-                                            );
-                                          }).toList(),
-                                        )),
+                                            ignoring:
+                                                data['status'] == 'Completed',
+                                            child: DropdownButton<String>(
+                                              value: _dropdownValue != ''
+                                                  ? _dropdownValue
+                                                  : null,
+                                              onChanged: (String? newValue) {
+                                                setState(() {
+                                                  _dropdownValue = newValue!;
+                                                });
+                                                changeTaskStatus(
+                                                    _dropdownValue);
+                                              },
+                                              items: <String>[
+                                                'Yet to start',
+                                                'Completed',
+                                                'In Progress'
+                                              ].map<DropdownMenuItem<String>>(
+                                                  (String value) {
+                                                return DropdownMenuItem<String>(
+                                                  value: value,
+                                                  child: Container(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 8),
+                                                      width:
+                                                          100, // Adjust the width as needed
+                                                      alignment:
+                                                          Alignment.center,
+                                                      child: Text(value)),
+                                                );
+                                              }).toList(),
+                                            )),
                                       ],
                                     ),
+                                    // Text(data['document']),
+                                    data['document'] != null
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              downloadAndOpenPDF(
+                                                  data['document']);
+                                            },
+                                            child: const Row(
+                                              children: [
+                                                Icon(Icons.download),
+                                                Text(
+                                                  "Download doc",
+                                                  style: TextStyle(
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                      color: Color.fromARGB(
+                                                          255, 58, 4, 130)),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : Container(),
                                     const Spacer(),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        data['status']=='Completed'
+                                        data['status'] == 'Completed'
                                             ? Container()
                                             : Row(
                                                 children: [
@@ -436,7 +495,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                                   ),
                                                 ],
                                               ),
-                                       data['status']=='Completed'
+                                        data['status'] == 'Completed'
                                             ? Container()
                                             : IconButton(
                                                 onPressed: () {
@@ -456,8 +515,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                                   });
                                                 },
                                                 icon: widget.isArchived == true
-                                                    ? Icon(Icons.unarchive)
-                                                    : Icon(Icons.archive))
+                                                    ? const Icon(Icons.unarchive)
+                                                    : const Icon(Icons.archive))
                                       ],
                                     ),
                                   ],

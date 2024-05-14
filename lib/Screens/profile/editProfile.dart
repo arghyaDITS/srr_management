@@ -45,10 +45,9 @@ class _EditProfileState extends State<EditProfile> {
   File? _image;
   // var image;
 
-  void _imgFromGallery() async {
+void _imgFromGallery() async {
     var pickedImage = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      // image = pickedImage!.path;
       _image = File(pickedImage!.path);
     });
   }
@@ -56,7 +55,6 @@ class _EditProfileState extends State<EditProfile> {
   void _imgFromCamera() async {
     var pickedImage = await _picker.pickImage(source: ImageSource.camera);
     setState(() {
-      // image = pickedImage!.path;
       _image = File(pickedImage!.path);
     });
   }
@@ -95,6 +93,10 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   void getUserData() async {
+    setState(() {
+      isLoading=true;
+      
+    });
     String url = APIData.userDetails;
     print(url);
     var res = await http.get(Uri.parse(url), headers: {
@@ -110,9 +112,14 @@ class _EditProfileState extends State<EditProfile> {
       email.text = '${data['user']['email']}';
       mobile.text = data['user']['phone_no'] ?? '';
     }
+       setState(() {
+      isLoading=false;
+      
+    });
   }
 
   updateUserData() async {
+    print("without iamge");
     // setState(() {
     //   isLoading = true;
     // });
@@ -132,11 +139,11 @@ class _EditProfileState extends State<EditProfile> {
       'name': name.text,
       'email': email.text,
       'phone': mobile.text,
-     // 'profile_image': base64Image,
-      'dob':dateOfBirth.text,
-      'gender':genderValue,
-      'marital_status':maritalValue,
-      'address':presentAddress.text
+      // 'profile_image': base64Image,
+      'dob': dateOfBirth.text,
+      'gender': genderValue,
+      'marital_status': maritalValue,
+      'address': presentAddress.text
     });
     print(res.statusCode);
     if (res.statusCode == 200) {
@@ -149,6 +156,57 @@ class _EditProfileState extends State<EditProfile> {
 
       // _streamController.add(data['data']);
     }
+    return 'Success';
+  }
+
+  Future<String> updateProfileWithImage(context) async {
+    print("with iamge");
+    setState(() {
+      isLoading = true;
+    });
+    Map<String, String> formData = {
+      'user_id': ServiceManager.userID,
+      'name': name.text,
+      'email': email.text,
+      'phone': mobile.text,
+      'dob': dateOfBirth.text,
+      'gender': genderValue,
+      'marital_status': maritalValue,
+      'address': presentAddress.text
+    };
+    String url = APIData.updateUser;
+    print(url);
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.fields.addAll(formData);
+
+    Map<String, String> headers = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    };
+    request.headers.addAll(headers);
+    if (_image != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('profile_image', _image!.path),
+      );
+    }
+    print("**************");
+    print(formData.toString());
+    print("**************");
+    var response = await request.send();
+    var responseString = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      setState(() {
+        ServiceManager.profileURL = _image!.path;
+      });
+      toastMessage(message: 'Profile Updated');
+      Navigator.pop(context);
+    } else {
+      toastMessage(message: 'Server Error');
+    }
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: $responseString');
     return 'Success';
   }
 
@@ -165,7 +223,7 @@ class _EditProfileState extends State<EditProfile> {
         ),
       ),
       body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         child: Container(
           height: MediaQuery.of(context).size.height,
           decoration: kBackgroundDesign(context),
@@ -191,7 +249,7 @@ class _EditProfileState extends State<EditProfile> {
                             backgroundImage: FileImage(File(_image!.path)),
                           )
                         : ServiceManager.profileURL == ''
-                            ? CircleAvatar(
+                            ? const CircleAvatar(
                                 radius: 70,
                                 backgroundImage:
                                     AssetImage('images/img_blank_profile.png'),
@@ -209,7 +267,7 @@ class _EditProfileState extends State<EditProfile> {
                       backgroundColor: Colors.black.withOpacity(0.6),
                       radius: 20,
                       child: IconButton(
-                        icon: Icon(Icons.edit_outlined),
+                        icon: const Icon(Icons.edit_outlined),
                         color: Colors.white,
                         onPressed: () {
                           showModalBottomSheet(
@@ -250,7 +308,8 @@ class _EditProfileState extends State<EditProfile> {
                 controller: mobile,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -265,7 +324,7 @@ class _EditProfileState extends State<EditProfile> {
                           child: DropdownButton(
                             borderRadius: BorderRadius.circular(10.0),
                             value: genderValue != '' ? genderValue : null,
-                            hint: Text('Gender'),
+                            hint: const Text('Gender'),
                             items: genderList
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
@@ -286,7 +345,8 @@ class _EditProfileState extends State<EditProfile> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -301,7 +361,7 @@ class _EditProfileState extends State<EditProfile> {
                           child: DropdownButton(
                             borderRadius: BorderRadius.circular(10.0),
                             value: maritalValue != '' ? maritalValue : null,
-                            hint: Text('Marital Status'),
+                            hint: const Text('Marital Status'),
                             items: maritalList
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
@@ -328,7 +388,7 @@ class _EditProfileState extends State<EditProfile> {
                   onPressed: () {
                     _selectDate(context, 1);
                   },
-                  icon: Icon(Icons.calendar_month),
+                  icon: const Icon(Icons.calendar_month),
                 ),
               ),
               KTextField(
@@ -343,8 +403,13 @@ class _EditProfileState extends State<EditProfile> {
       floatingActionButton: KButton(
         title: 'Update',
         onClick: () {
-          updateUserData();
-         // Navigator.pop(context);
+          if (_image != null) {
+            updateProfileWithImage(context);
+          } else {
+            updateUserData();
+          }
+
+          // Navigator.pop(context);
           toastMessage(message: 'Profile Updated');
         },
       ),

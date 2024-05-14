@@ -35,7 +35,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   int? _duration;
-  String category = 'a';
+  String category = 'Logistic';
   bool isMoreMember = false;
   //String _filePath = '';
   bool isSelected = false;
@@ -404,7 +404,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         category = value!;
                       });
                     },
-                    items: <String>['a', 'b', 'c', 'd']
+                    items: <String>['Logistic', 'Office', 'Admin', 'Tender']
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -648,7 +648,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     var request = http.MultipartRequest('POST', Uri.parse(url));
     if (file != null) {
       request.files.add(http.MultipartFile(
-          'file',
+          'document',
           File(file.path).readAsBytes().asStream(),
           File(file.path).lengthSync(),
           filename: file.path.split('/').last));
@@ -661,6 +661,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         selectedUserIds.map((int number) => number.toString()).toList());
     request.fields['category_id'] = category;
     request.fields['priority'] = _selectedPriority;
+    Map<String, String> headers = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    };
+    request.headers.addAll(headers);
 
     // var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
     //   'title': _titleController.text,
