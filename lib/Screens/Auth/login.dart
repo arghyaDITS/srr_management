@@ -13,6 +13,7 @@ import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -28,13 +29,34 @@ class _LoginState extends State<Login> {
 
   bool isObscure = true;
   bool isLoading = false;
+    String message = '';
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     email.text = "krishnabasak.dits@gmail.com";
     password.text = "12345678";
+   // checkDeviceType();
   }
+  //   Future<void> checkDeviceType() async {
+  //   String platform = '';
+  //   try {
+  //     platform = await MethodChannel('samples.flutter.dev/device_info')
+  //         .invokeMethod('getPlatform');
+  //   } on PlatformException catch (e) {
+  //     print("Failed to get platform: '${e.message}'.");
+  //   }
+
+  //   setState(() {
+  //     if (platform == 'tv') {
+  //       message = 'Welcome to TV';
+  //     } else {
+  //       message = 'Welcome to App';
+  //     }
+  //   });
+  // }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +76,7 @@ class _LoginState extends State<Login> {
             children: [
               const SizedBox(height: 50),
               Image.asset(
-                'images/logo.jpg',
+                'images/srr_logo.png',
                 height: 100,
                 width: 100,
               ),
@@ -164,6 +186,9 @@ class _LoginState extends State<Login> {
   }
 
   Future<String> loginUser(context) async {
+    setState(() {
+      isLoading=true;
+    });
     String url = APIData.login;
     print(url.toString());
     var res = await http.post(Uri.parse(url), body: {
@@ -197,6 +222,9 @@ class _LoginState extends State<Login> {
       });
       toastMessage(message: 'Invalid email or password');
     }
+    setState(() {
+      isLoading=false;
+    });
     return 'Success';
   }
 }

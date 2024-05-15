@@ -13,6 +13,7 @@ import 'package:srr_management/Screens/task/taskList.dart';
 import 'package:srr_management/Screens/task/totalTaskList.dart';
 import 'package:srr_management/adminAction/addminTaskList.dart';
 import 'package:srr_management/adminAction/testfile.dart';
+import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 
@@ -25,6 +26,24 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   String user = "Tony";
+  bool isLoading = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
+  getData() async {
+    setState(() {
+      isLoading = true;
+    });
+    ServiceManager().getUserData();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   customContainer({height, width, color, iconData, text2, onPress, fontsize}) {
     return GestureDetector(
       onTap: onPress,
@@ -49,8 +68,10 @@ class _DashboardViewState extends State<DashboardView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(iconData,
-                  color: Color.fromARGB(255, 81, 47, 129),),
+                  Icon(
+                    iconData,
+                    color: Color.fromARGB(255, 81, 47, 129),
+                  ),
                   // Text(
                   //   //textAlign: TextAlign.center,
                   //   text1,
@@ -133,277 +154,306 @@ class _DashboardViewState extends State<DashboardView> {
       decoration: kBackgroundDesign(context),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        body: isLoading == false
+            ? SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    GradientText(
-                      "Welcome\n ${ServiceManager.userName.split(" ")[0]}! ",
-                      style: const TextStyle(
-                        fontSize: 28.0,
-                        fontWeight: FontWeight.w700
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GradientText(
+                          
+                            "Welcome\n ${ServiceManager.userName.split(" ")[0]}! ",
+                            style: const TextStyle(
+                              
+                                fontSize: 28.0, fontWeight: FontWeight.w700),
+                            colors: const [
+                              Colors.purple,
+                              Colors.red,
+                              Color.fromARGB(255, 13, 152, 18),
+                            ],
+                          ),
+                        ],
                       ),
-                      colors: const [
-                        Colors.purple,
-                        Colors.red,
-                        Color.fromARGB(255, 13, 152, 18),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        customContainer(
+                            height: 210.0,
+                            width: 180.0,
+                            iconData: Icons.calendar_today,
+                            text2: "Todays work!",
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          InProgressTaskListScreen()));
+                            }),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            customContainer(
+                                height: 100.0,
+                                width: 130.0,
+                                iconData: Icons.task,
+                                text2: "Total Task",
+                                fontsize: 14.0,
+                                onPress: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TotalTaskList(
+                                                status: "Total",
+                                              )));
+                                }),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            customContainer(
+                                height: 100.0,
+                                width: 130.0,
+                                iconData: Icons.task_alt_sharp,
+                                text2: "Completed",
+                                fontsize: 14.0,
+                                onPress: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TotalTaskList(
+                                                status: "Completed",
+                                              )));
+                                }),
+                          ],
+                        )
                       ],
                     ),
+                    ServiceManager.roleAs == 'user'
+                        ? SizedBox(
+                            height: 30,
+                          )
+                        : Container(),
+                    ServiceManager.roleAs == 'user'
+                        ? Container()
+                        : const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 15.0, vertical: 10),
+                                child: Text(
+                                  "Admin's Actions:-",
+                                  style: TextStyle(
+                                      color: Colors.blueGrey,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ],
+                          ),
+                    ServiceManager.roleAs == 'user'
+                        ? Container()
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              smallContainer(
+                                  color:
+                                      const Color.fromARGB(255, 143, 177, 170),
+                                  text: "Add task",
+                                  quantity: '1',
+                                  height: 80.0,
+                                  width: 80.0,
+                                  fontsize: 12.0,
+                                  isIcon: true,
+                                  onPress: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                CreateTaskScreen()));
+                                  },
+                                  iconData: Icons.add_task),
+                              smallContainer(
+                                  color:
+                                      const Color.fromARGB(255, 141, 184, 175),
+                                  text: "Notes",
+                                  quantity: '1',
+                                  height: 80.0,
+                                  width: 80.0,
+                                  fontsize: 12.0,
+                                  isIcon: true,
+                                  onPress: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                AddNoteScreen()));
+                                  },
+                                  iconData: Icons.notes_outlined),
+                              smallContainer(
+                                  color:
+                                      const Color.fromARGB(255, 116, 156, 148),
+                                  text: "Total Task",
+                                  quantity: '1',
+                                  height: 80.0,
+                                  width: 80.0,
+                                  fontsize: 12.0,
+                                  isIcon: true,
+                                  iconData: Icons.leave_bags_at_home,
+                                  onPress: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AdminTaskList()));
+                                  }),
+                              smallContainer(
+                                  color:
+                                      const Color.fromARGB(255, 116, 156, 148),
+                                  text: "Leaves",
+                                  quantity: '1',
+                                  height: 80.0,
+                                  width: 80.0,
+                                  fontsize: 12.0,
+                                  isIcon: true,
+                                  iconData: Icons.leave_bags_at_home,
+                                  onPress: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const LeaveManagement()));
+                                  }),
+                            ],
+                          ),
+                    const Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(left: 15.0),
+                          child: Text(
+                            "Filter Task by",
+                            style: TextStyle(
+                                color: Colors.blueGrey,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        smallContainer(
+                            color: const Color.fromARGB(255, 129, 80, 207),
+                            text: "Apply Leave",
+                            isIcon: true,
+                            iconData: Icons.leave_bags_at_home,
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          LeaveApplicationScreen()));
+                            },
+                            quantity: '1'),
+                        smallContainer(
+                            color: Color.fromARGB(255, 99, 137, 221),
+                            text: "Review",
+                            isIcon: true,
+                            iconData: Icons.reviews,
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ReviewScreen()));
+                            },
+                            quantity: '3'),
+                        smallContainer(
+                            color: const Color.fromARGB(255, 103, 52, 185),
+                            text: "Archived",
+                            isIcon: true,
+                            iconData: Icons.archive_rounded,
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ArchivedTaskList()));
+                            },
+                            quantity: '0'),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: ServiceManager.roleAs == 'user'
+                          ? MainAxisAlignment.start
+                          : MainAxisAlignment.spaceAround,
+                      children: [
+                        Padding(
+                            padding:ServiceManager.roleAs=='user'? EdgeInsets.only(left: 10, right: 20):EdgeInsets.all(0),
+                            child: smallContainer(
+                                color: const Color.fromARGB(255, 192, 63, 23),
+                                text: "In progress",
+                                isIcon: true,
+                                iconData: Icons.run_circle,
+                                onPress: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TotalTaskList(
+                                                status: "In progress",
+                                              )
+                                          //InProgressTaskListScreen()
+                                          ));
+                                },
+                                quantity: '0')),
+                        smallContainer(
+                            color: Colors.deepOrangeAccent,
+                            text: "My Issues",
+                            isIcon: true,
+                            iconData: Icons.sync_problem_rounded,
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => IssuedTaskScreen(
+                                            isAdmin: false,
+                                          )));
+                            },
+                            quantity: '1'),
+                        ServiceManager.roleAs == 'user'
+                            ? Container()
+                            : smallContainer(
+                                color: const Color.fromARGB(255, 216, 124, 95),
+                                text: "Issues",
+                                isIcon: true,
+                                iconData: Icons.report_problem,
+                                onPress: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              IssuedTaskScreen(
+                                                isAdmin: true,
+                                              )));
+                                },
+                                quantity: '3'),
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height / 20)
                   ],
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  customContainer(
-                      height: 210.0,
-                      width: 180.0,
-                      iconData: Icons.calendar_today,
-                      text2: "Todays work!",
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>  InProgressTaskListScreen()));
-                      }),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      customContainer(
-                          height: 100.0,
-                          width: 130.0,
-                          iconData: Icons.task,
-                          text2: "Total Task",
-                          fontsize: 14.0,
-                          onPress: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const TotalTaskList(
-                                          status: "Total",
-                                        )));
-                          }),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      customContainer(
-                          height: 100.0,
-                          width: 130.0,
-                          iconData: Icons.task_alt_sharp,
-                          text2: "Completed",
-                          fontsize: 14.0,
-                          onPress: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const TotalTaskList(
-                                          status: "Completed",
-                                        )));
-                          }),
-                    ],
-                  )
-                ],
-              ),
-              const Row(
-                children: [
-                  Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 25.0, vertical: 10),
-                    child: Text(
-                      "Admin's Actions:-",
-                      style: TextStyle(
-                          color: Colors.blueGrey,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  smallContainer(
-                      color: const Color.fromARGB(255, 143, 177, 170),
-                      text: "Add task",
-                      quantity: '1',
-                      height: 80.0,
-                      width: 80.0,
-                      fontsize: 12.0,
-                      isIcon: true,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CreateTaskScreen()));
-                      },
-                      iconData: Icons.add_task),
-                  smallContainer(
-                      color: const Color.fromARGB(255, 141, 184, 175),
-                      text: "Notes",
-                      quantity: '1',
-                      height: 80.0,
-                      width: 80.0,
-                      fontsize: 12.0,
-                      isIcon: true,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AddNoteScreen()));
-                      },
-                      iconData: Icons.notes_outlined),
-                  smallContainer(
-                      color: const Color.fromARGB(255, 116, 156, 148),
-                      text: "Total Task",
-                      quantity: '1',
-                      height: 80.0,
-                      width: 80.0,
-                      fontsize: 12.0,
-                      isIcon: true,
-                      iconData: Icons.leave_bags_at_home,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const AdminTaskList()));
-                      }),
-                  smallContainer(
-                      color: const Color.fromARGB(255, 116, 156, 148),
-                      text: "Leaves",
-                      quantity: '1',
-                      height: 80.0,
-                      width: 80.0,
-                      fontsize: 12.0,
-                      isIcon: true,
-                      iconData: Icons.leave_bags_at_home,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LeaveManagement()));
-                      }),
-                ],
-              ),
-              const Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 20.0),
-                    child: Text(
-                      "Filter Task by",
-                      style: TextStyle(
-                          color: Colors.blueGrey,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  smallContainer(
-                      color: Colors.deepOrangeAccent,
-                      text: "My Issues",
-                      isIcon: true,
-                      iconData: Icons.sync_problem_rounded,
-
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>  IssuedTaskScreen(
-                                      isAdmin: false,
-                                    )));
-                      },
-                      quantity: '1'),
-                  smallContainer(
-                      color: const Color.fromARGB(255, 216, 124, 95),
-                      text: "Issues",
-                      isIcon: true,
-                      iconData: Icons.report_problem,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                     IssuedTaskScreen(isAdmin: true,)));
-                      },
-                      quantity: '3'),
-                  smallContainer(
-                      color: const Color.fromARGB(255, 192, 63, 23),
-                      text: "In progress",
-                      isIcon: true,
-                      iconData: Icons.run_circle,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const TotalTaskList(
-                                          status: "In progress",
-                                        )
-                                    //InProgressTaskListScreen()
-                                    ));
-                      },
-                      quantity: '0'),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  smallContainer(
-                      color: const Color.fromARGB(255, 129, 80, 207),
-                      text: "Apply Leave",
-                      isIcon: true,
-                      iconData: Icons.leave_bags_at_home,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    LeaveApplicationScreen()));
-                      },
-                      quantity: '1'),
-                  smallContainer(
-                      color: Color.fromARGB(255, 99, 137, 221),
-                      text: "Review",
-                      isIcon: true,
-                      iconData: Icons.reviews,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ReviewScreen()));
-                      },
-                      quantity: '3'),
-                  smallContainer(
-                      color: const Color.fromARGB(255, 103, 52, 185),
-                      text: "Archived",
-                      isIcon: true,
-                      iconData: Icons.archive_rounded,
-                      onPress: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const ArchivedTaskList()));
-                      },
-                      quantity: '0'),
-                ],
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height / 20)
-            ],
-          ),
-        ),
+              )
+            : Center(child: LoadingIcon()),
       ),
     );
   }

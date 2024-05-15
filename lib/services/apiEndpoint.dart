@@ -11,6 +11,9 @@ class APIData {
   static const String updateUser = '${baseURL}api/update_user';
   static const String getUserList = '${baseURL}api/get_user_list';
 
+  static const String forgotPassLink = '${baseURL}api/forget_password';
+
+
   //Task Api
   static const String createTask = '${baseURL}api/create_task';
   static const String upDateTask = '${baseURL}api/update_task';

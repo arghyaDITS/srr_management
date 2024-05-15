@@ -263,7 +263,10 @@ class _AdminTaskListState extends State<AdminTaskList>
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text("Select Category:",style: kBoldStyle(),),
+                            Text(
+                              "Select Category:",
+                              style: kBoldStyle(),
+                            ),
                             Container(
                               padding: const EdgeInsets.all(10.0),
                               decoration: BoxDecoration(
@@ -278,8 +281,12 @@ class _AdminTaskListState extends State<AdminTaskList>
                                   color: Colors.transparent,
                                 ),
                                 onChanged: _onCategoryChanged,
-                                items: <String>['Logistic', 'Office', 'Admin', 'Tender']
-                                    .map((String value) {
+                                items: <String>[
+                                  'Logistic',
+                                  'Office',
+                                  'Admin',
+                                  'Tender'
+                                ].map((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(
@@ -327,7 +334,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                                       //         id: userId));
                                       //   }
                                       // }
-                                   
+
                                       //--------------------------------------------------------------Assigned user
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
@@ -536,7 +543,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                                               //     )
                                               //   ],
                                               // ),
-                                               Row(
+                                              Row(
                                                 children: [
                                                   Text(
                                                     "Assigned members: ",
@@ -550,7 +557,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                     ),
                                                   )
                                                 ],
-                                                                                             ),
+                                              ),
                                               Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,

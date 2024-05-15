@@ -158,8 +158,10 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       setState(() {
         isLoading = false;
       });
-      Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (context) => const Home()), (route) => false);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+          (route) => false);
     }
     return 'Success';
   }
@@ -448,6 +450,20 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                             )),
                                       ],
                                     ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Members: \n ",
+                                          style: kBoldStyle(),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            data['user_name'].join(", "),
+                                            style: k14Text(),
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                     // Text(data['document']),
                                     data['document'] != null
                                         ? GestureDetector(
@@ -515,7 +531,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                                   });
                                                 },
                                                 icon: widget.isArchived == true
-                                                    ? const Icon(Icons.unarchive)
+                                                    ? const Icon(
+                                                        Icons.unarchive)
                                                     : const Icon(Icons.archive))
                                       ],
                                     ),

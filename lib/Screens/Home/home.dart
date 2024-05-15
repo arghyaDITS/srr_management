@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:srr_management/Screens/Home/dashboard.dart';
 import 'package:srr_management/Screens/Home/profile.dart';
 import 'package:srr_management/Screens/Home/taskView.dart';
@@ -14,6 +15,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
+  String message = '';
 
   static final List<Widget> _widgetOptions = <Widget>[
     const DashboardView(),
@@ -34,6 +36,24 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  Future<void> checkDeviceType() async {
+    String platform = '';
+    try {
+      platform = await const MethodChannel('samples.flutter.dev/device_info')
+          .invokeMethod('getPlatform');
+    } on PlatformException catch (e) {
+      print("Failed to get platform: '${e.message}'.");
+    }
+
+    setState(() {
+      if (platform == 'tv') {
+        message = 'Welcome to TV';
+      } else {
+        message = 'Welcome to App';
+      }
+    });
+  }
+
   Future<bool> _onBackPressed() async {
     if (_selectedIndex != 0) {
       setState(() {
@@ -51,41 +71,25 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         appBar: _selectedIndex == 0
             ? AppBar(
-                backgroundColor: k2MainColor,
+                flexibleSpace: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.blueGrey,
+                        Colors.white
+                      ], // Define your gradient colors
+                    ),
+                  ),
+                ),
                 leading: GestureDetector(
                   onTap: () {
                     // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
                   },
-                  // child: const Padding(
-                  //     padding: EdgeInsets.all(10.0),
-                  //     child: CircleAvatar(
-                  //       radius: 10.0,
-                  //       backgroundImage:
-                  //           AssetImage('images/img_blank_profile.png'),
-                  //     )),
                 ),
                 centerTitle: true,
-                title: CircleAvatar(
-                  child: Image.asset('images/logo.jpg', height: 55),
-                  radius: 30,
-                ),
-                // title: Text('Astha Saloon'),
-                // actions: [
-                //   // if(ServiceManager.isAdmin != false)
-                //   IconButton(
-                //     onPressed: (){
-                //       // Navigator.push(context, MaterialPageRoute(
-                //       //     builder: (context) => AppointmentCalender()));
-                //     },
-                //     icon: const Icon(Icons.calendar_month_outlined),
-                //   ),
-                //   IconButton(
-                //     onPressed: (){
-                //    //   LocationService().fetchLocation();
-                //     },
-                //     icon: const Icon(Icons.refresh),
-                //   ),
-                // ],
+                title: Image.asset('images/srr_logo.png', height: 55),
               )
             : null,
         body: Center(

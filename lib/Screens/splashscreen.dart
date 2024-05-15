@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
       decoration: kBackgroundDesign(context),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Center(child: Image.asset('images/logo.jpg', height: 200)),
+        body: Center(child: Image.asset('images/srr_logo.png', height: 200)),
       ),
     );
   }

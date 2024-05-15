@@ -132,7 +132,7 @@ LinearGradient shadedTopGradient() {
 BoxDecoration kBackgroundDesign(BuildContext context) {
   return BoxDecoration(
     image: DecorationImage(
-      image: AssetImage('images/01.jpg'),
+      image: AssetImage('images/01.jpeg'),
       fit: BoxFit.cover,
       colorFilter: ColorFilter.mode(
         Theme.of(context).scaffoldBackgroundColor != Colors.black ?
