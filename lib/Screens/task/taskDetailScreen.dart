@@ -60,9 +60,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       print(res.body);
 
       var data = jsonDecode(res.body);
-      _dropdownValue = data['task']['status'] == 'pending'
+      _dropdownValue = data['task']['status'] == 'Yet to start'
           ? 'Yet to start'
-          : data['task']['status'] == 'completed'
+          : data['task']['status'] == 'Completed'
               ? 'Completed'
               : "In Progress";
 
@@ -251,7 +251,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   children: [
                     Container(
                         decoration: kBackgroundDesign(context),
-                        height: MediaQuery.of(context).size.height / 1.1,
+                        height: MediaQuery.of(context).size.height / 1.0,
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                             padding: const EdgeInsets.only(
