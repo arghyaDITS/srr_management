@@ -247,300 +247,344 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               print(data.toString());
 
               return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                        decoration: kBackgroundDesign(context),
-                        height: MediaQuery.of(context).size.height / 1.0,
-                        width: MediaQuery.of(context).size.width,
-                        child: Padding(
-                            padding: const EdgeInsets.only(
-                                top: 30.0, bottom: 250, left: 30, right: 30),
-                            child: Card(
-                              elevation: 4,
-                              margin: const EdgeInsets.all(8),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Task ID: ${data['title']}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'Task Description:  ',
-                                          style: kBoldStyle(),
-                                        ),
-                                        Text(' ${data['description']}'),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Priority: ",
-                                          style: kBoldStyle(),
-                                        ),
-                                        Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              color: data['priority'] == 'high'
-                                                  ? const Color.fromARGB(
-                                                      255, 240, 134, 126)
-                                                  : data['priority'] == 'low'
-                                                      ? const Color.fromARGB(
-                                                          255, 109, 207, 112)
-                                                      : const Color.fromARGB(
-                                                          255, 190, 181, 96),
-                                              borderRadius: BorderRadius.circular(
-                                                  8), // Adjust border radius as needed
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey
-                                                      .withOpacity(0.5),
-                                                  spreadRadius: 2,
-                                                  blurRadius: 4,
-                                                  offset: const Offset(0,
-                                                      3), // changes position of shadow
-                                                ),
-                                              ],
-                                            ),
-                                            child: Text(
-                                              data['priority'],
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            ))
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            padding: const EdgeInsets.all(16),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey
-                                                      .withOpacity(0.5),
-                                                  spreadRadius: 2,
-                                                  blurRadius: 4,
-                                                  offset: const Offset(0,
-                                                      3), // changes position of shadow
-                                                ),
-                                              ],
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Text(
-                                                  'Start Date:',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  DateFormat('EEE, d/M/y')
-                                                      .format(DateTime.parse(
-                                                          data['start_date']))
-                                                      .toString(), // Replace with your start date
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey[800],
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                const Text(
-                                                  'End Date:',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  DateFormat('EEE, d/M/y')
-                                                      .format(DateTime.parse(
-                                                          data['end_date']))
-                                                      .toString(), // Replace with your start date
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey[800],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    // Row(
-                                    //   mainAxisAlignment:
-                                    //       MainAxisAlignment.spaceAround,
-                                    //   children: [
-                                    //     ElevatedButton(
-                                    //       onPressed: () {
-                                    //         // Handle archive button click
-                                    //       },
-                                    //       child: const Text('Archive'),
-                                    //     ),
-                                    //     ElevatedButton(
-                                    //       onPressed: () {
-                                    //         // Handle start button click
-                                    //       },
-                                    //       child: const Text('Start'),
-                                    //     ),
-                                    //   ],
-                                    // ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Select task Status:",
-                                          style: kBoldStyle(),
-                                        ),
-                                        IgnorePointer(
-                                            ignoring:
-                                                data['status'] == 'Completed',
-                                            child: DropdownButton<String>(
-                                              value: _dropdownValue != ''
-                                                  ? _dropdownValue
-                                                  : null,
-                                              onChanged: (String? newValue) {
-                                                setState(() {
-                                                  _dropdownValue = newValue!;
-                                                });
-                                                changeTaskStatus(
-                                                    _dropdownValue);
-                                              },
-                                              items: <String>[
-                                                'Yet to start',
-                                                'Completed',
-                                                'In Progress'
-                                              ].map<DropdownMenuItem<String>>(
-                                                  (String value) {
-                                                return DropdownMenuItem<String>(
-                                                  value: value,
-                                                  child: Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 8),
-                                                      width:
-                                                          100, // Adjust the width as needed
-                                                      alignment:
-                                                          Alignment.center,
-                                                      child: Text(value)),
-                                                );
-                                              }).toList(),
-                                            )),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Members: \n ",
-                                          style: kBoldStyle(),
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            data['user_name'].join(", "),
-                                            style: k14Text(),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    // Text(data['document']),
-                                    data['document'] != null
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              downloadAndOpenPDF(
-                                                  data['document']);
-                                            },
-                                            child: const Row(
-                                              children: [
-                                                Icon(Icons.download),
-                                                Text(
-                                                  "Download doc",
-                                                  style: TextStyle(
-                                                      decoration: TextDecoration
-                                                          .underline,
-                                                      color: Color.fromARGB(
-                                                          255, 58, 4, 130)),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : Container(),
-                                    const Spacer(),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        data['status'] == 'Completed'
-                                            ? Container()
-                                            : Row(
-                                                children: [
-                                                  const Text(
-                                                      textScaleFactor:
-                                                          0.8, // Adjust the scaling factor as needed
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      "Having Issue, Raise Flag!"),
-                                                  IconButton(
-                                                    icon:
-                                                        const Icon(Icons.flag),
-                                                    color: Colors.red,
-                                                    onPressed: () {
-                                                      _showIssueDialog(context);
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                        data['status'] == 'Completed'
-                                            ? Container()
-                                            : IconButton(
-                                                onPressed: () {
-                                                  declinePopUp(
-                                                      context,
-                                                      widget.isArchived == true
-                                                          ? 'Unarchive'
-                                                          : "archive",
-                                                      onClickYes: () {
-                                                    archiveTask();
-                                                    //--
-                                                    // deleteTask(
-                                                    //     data[index]
-                                                    //         ['id']);
-
-                                                    Navigator.pop(context);
-                                                  });
-                                                },
-                                                icon: widget.isArchived == true
-                                                    ? const Icon(
-                                                        Icons.unarchive)
-                                                    : const Icon(Icons.archive))
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                child: Container(
+                  decoration: kBackgroundDesign(context),
+                  padding: EdgeInsets.all(12),
+                  height: MediaQuery.of(context).size.height,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 252, 248, 255),
+                          border: Border.all(
+                            color: Colors.black,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(10.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        //  height: MediaQuery.of(context).size.height/2,
+                        //  elevation: 4,
+                        margin: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Task ID: ${data['title']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                            ))),
-                  ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Task Description:  ',
+                                  style: kBoldStyle(),
+                                ),
+                                Expanded(
+                                    child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Color.fromARGB(255, 240, 249, 241),
+                                          border: Border.all(
+                                            color: Colors.black,
+                                            width: 1.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(0.5),
+                                              spreadRadius: 1,
+                                              blurRadius: 7,
+                                              offset: Offset(0,
+                                                  0.2), // changes position of shadow
+                                            ),
+                                          ],
+                                        ),
+                                        padding: EdgeInsets.all(4),
+                                       // color: Colors.white,
+                                        child:
+                                            Text(' ${data['description']}'))),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Text(
+                                  "Priority: ",
+                                  style: kBoldStyle(),
+                                ),
+                                Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: data['priority'] == 'high'
+                                          ? const Color.fromARGB(
+                                              255, 240, 134, 126)
+                                          : data['priority'] == 'low'
+                                              ? const Color.fromARGB(
+                                                  255, 109, 207, 112)
+                                              : const Color.fromARGB(
+                                                  255, 190, 181, 96),
+                                      borderRadius: BorderRadius.circular(
+                                          8), // Adjust border radius as needed
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2,
+                                          blurRadius: 4,
+                                          offset: const Offset(0,
+                                              3), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: Text(
+                                      data['priority'],
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ))
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 2,
+                                          blurRadius: 4,
+                                          offset: const Offset(0,
+                                              3), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Start Date:',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          DateFormat('EEE, d/M/y')
+                                              .format(DateTime.parse(
+                                                  data['start_date']))
+                                              .toString(), // Replace with your start date
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        const Text(
+                                          'End Date:',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          DateFormat('EEE, d/M/y')
+                                              .format(DateTime.parse(
+                                                  data['end_date']))
+                                              .toString(), // Replace with your start date
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            // Row(
+                            //   mainAxisAlignment:
+                            //       MainAxisAlignment.spaceAround,
+                            //   children: [
+                            //     ElevatedButton(
+                            //       onPressed: () {
+                            //         // Handle archive button click
+                            //       },
+                            //       child: const Text('Archive'),
+                            //     ),
+                            //     ElevatedButton(
+                            //       onPressed: () {
+                            //         // Handle start button click
+                            //       },
+                            //       child: const Text('Start'),
+                            //     ),
+                            //   ],
+                            // ),
+                         
+                         data['status'] == 'Completed'?SizedBox(height: 10,):Container(),
+                         data['status'] == 'Completed'?Row(children: [
+                          Text(
+                                  "Task Status: ",
+                                  style: kBoldStyle(),
+                                ),
+                                Text(
+                                  data['status'],
+                                 
+                                ),
+
+                         ],) :  Row(
+                              children: [
+                                Text(
+                                  "Select task Status:",
+                                  style: kBoldStyle(),
+                                ),
+                                IgnorePointer(
+                                    ignoring: data['status'] == 'Completed',
+                                    child: DropdownButton<String>(
+                                      value: _dropdownValue != ''
+                                          ? _dropdownValue
+                                          : null,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _dropdownValue = newValue!;
+                                        });
+                                        changeTaskStatus(_dropdownValue);
+                                      },
+                                      items: <String>[
+                                        'Yet to start',
+                                        'Completed',
+                                        'In Progress'
+                                      ].map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8),
+                                              width:
+                                                  100, // Adjust the width as needed
+                                              alignment: Alignment.center,
+                                              child: Text(value)),
+                                        );
+                                      }).toList(),
+                                    )),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "Members:  ",
+                                  style: kBoldStyle(),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    data['user_name'].join(", "),
+                                    style: k14Text(),
+                                  ),
+                                )
+                              ],
+                            ),
+                            // Text(data['document']),
+                            data['document'] != null
+                                ? GestureDetector(
+                                    onTap: () {
+                                      downloadAndOpenPDF(data['document']);
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.download),
+                                        Text(
+                                          "Download doc",
+                                          style: TextStyle(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              color: Color.fromARGB(
+                                                  255, 58, 4, 130)),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Container(),
+                            //const Spacer(),
+                            SizedBox(
+                              height: 40,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                data['status'] == 'Completed'
+                                    ? Container()
+                                    : Row(
+                                        children: [
+                                          const Text(
+                                              textScaleFactor:
+                                                  0.8, // Adjust the scaling factor as needed
+                                              overflow: TextOverflow.ellipsis,
+                                              "Having Issue, Raise Flag!"),
+                                          IconButton(
+                                            icon: const Icon(Icons.flag),
+                                            color: Colors.red,
+                                            onPressed: () {
+                                              _showIssueDialog(context);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                data['status'] == 'Completed'
+                                    ? Container()
+                                    : IconButton(
+                                        onPressed: () {
+                                          declinePopUp(
+                                              context,
+                                              widget.isArchived == true
+                                                  ? 'Unarchive'
+                                                  : "archive", onClickYes: () {
+                                            archiveTask();
+                                            //--
+                                            // deleteTask(
+                                            //     data[index]
+                                            //         ['id']);
+
+                                            Navigator.pop(context);
+                                          });
+                                        },
+                                        icon: widget.isArchived == true
+                                            ? const Icon(Icons.unarchive)
+                                            : const Icon(Icons.archive))
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }

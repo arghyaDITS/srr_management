@@ -29,15 +29,15 @@ class _LoginState extends State<Login> {
 
   bool isObscure = true;
   bool isLoading = false;
-    String message = '';
+  String message = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    email.text = "krishnabasak.dits@gmail.com";
-    password.text = "12345678";
-   // checkDeviceType();
+     email.text = "srrmspvtltd@gmail.com";//"srrmspvtltd@gmail.com";//"krishnabasak.dits@gmail.com";
+     password.text = "12345678";
+    // checkDeviceType();
   }
   //   Future<void> checkDeviceType() async {
   //   String platform = '';
@@ -56,138 +56,141 @@ class _LoginState extends State<Login> {
   //     }
   //   });
   // }
-  
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.blue[50],
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.blue[100],
-        title: const Text('Login'),
-      ),
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(height: 50),
-              Image.asset(
-                'images/srr_logo.png',
-                height: 100,
-                width: 100,
-              ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                    textAlign: TextAlign.center,
-                    style: kHeaderStyle(color: Colors.blueGrey),
-                    "Please enter your valid email address, we don't share it with anyone without your consent"),
-              ),
-              const SizedBox(height: 40),
-              KTextField(
-                title: 'Email',
-                controller: email,
-                textInputType: TextInputType.emailAddress,
-              ),
-              KTextField(
-                title: 'Password',
-                controller: password,
-                obscureText: isObscure,
-                suffixButton: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isObscure = !isObscure;
-                    });
-                  },
-                  icon: Icon(!isObscure
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility),
+    return Container(
+      decoration: kBackgroundDesign(context),
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.blue[50],
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: Colors.blue[100],
+          title: const Text('Login'),
+        ),
+        body: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: 50),
+                Image.asset(
+                  'images/srr_logo.png',
+                  height: 100,
+                  width: 100,
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: TextButton(
-                      child: Text(
-                        "Forgotten Password?",
-                        style: linkTextStyle(context),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                      textAlign: TextAlign.center,
+                      style: kHeaderStyle(color: Colors.blueGrey),
+                      "Please enter your valid email address, we don't share it with anyone without your consent"),
+                ),
+                const SizedBox(height: 40),
+                KTextField(
+                  title: 'Email',
+                  controller: email,
+                  textInputType: TextInputType.emailAddress,
+                ),
+                KTextField(
+                  title: 'Password',
+                  controller: password,
+                  obscureText: isObscure,
+                  suffixButton: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isObscure = !isObscure;
+                      });
+                    },
+                    icon: Icon(!isObscure
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: TextButton(
+                        child: Text(
+                          "Forgotten Password?",
+                          style: linkTextStyle(context),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ForgetPasswordScreen(),
+                            ),
+                          );
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ForgetPasswordScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                        style: TextStyle(
-                            color:
-                                Theme.of(context).textTheme.bodySmall!.color),
-                        children: <TextSpan>[
-                          const TextSpan(text: 'By continuing you agree to '),
-                          TextSpan(
-                            text: 'Terms of Use',
-                            style: linkTextStyle(context),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                // Navigator.push(context, MaterialPageRoute(
-                                //     builder: (context) => TermsAndCondition()));
-                              },
-                          ),
-                          const TextSpan(text: ' & '),
-                          TextSpan(
-                            text: 'Privacy Policy',
-                            style: linkTextStyle(context),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                // Navigator.push(context, MaterialPageRoute(
-                                //     builder: (context) => PrivacyPolicy()));
-                              },
-                          ),
-                        ])),
-              ),
-            ],
+                    )
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                          style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodySmall!.color),
+                          children: <TextSpan>[
+                            const TextSpan(text: 'By continuing you agree to '),
+                            TextSpan(
+                              text: 'Terms of Use',
+                              style: linkTextStyle(context),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  // Navigator.push(context, MaterialPageRoute(
+                                  //     builder: (context) => TermsAndCondition()));
+                                },
+                            ),
+                            const TextSpan(text: ' & '),
+                            TextSpan(
+                              text: 'Privacy Policy',
+                              style: linkTextStyle(context),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  // Navigator.push(context, MaterialPageRoute(
+                                  //     builder: (context) => PrivacyPolicy()));
+                                },
+                            ),
+                          ])),
+                ),
+                SizedBox(height: 70,)
+              ],
+            ),
           ),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: isLoading != true
+            ? KButton(
+                title: 'Login',
+                onClick: () {
+                  if (_formKey.currentState!.validate()) {
+                    // setState(() {
+                    //   isLoading = true;
+                    // });
+                    loginUser(context);
+      
+                    // loginUser(context);
+                  }
+                },
+              )
+            : LoadingButton(),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: isLoading != true
-          ? KButton(
-              title: 'Login',
-              onClick: () {
-                if (_formKey.currentState!.validate()) {
-                  // setState(() {
-                  //   isLoading = true;
-                  // });
-                  loginUser(context);
-
-                  // loginUser(context);
-                }
-              },
-            )
-          : LoadingButton(),
     );
   }
 
   Future<String> loginUser(context) async {
     setState(() {
-      isLoading=true;
+      isLoading = true;
     });
     String url = APIData.login;
     print(url.toString());
@@ -202,10 +205,10 @@ class _LoginState extends State<Login> {
       var data = jsonDecode(res.body);
       try {
         print('${data['userInfo']['id']}');
-         ServiceManager().setUser('${data['userInfo']['id']}');
-         ServiceManager().setToken('${data['token']}');
+        ServiceManager().setUser('${data['userInfo']['id']}');
+        ServiceManager().setToken('${data['token']}');
         ServiceManager.userID = '${data['userInfo']['id']}';
-       ServiceManager.tokenID = '${data['token']}';
+        ServiceManager.tokenID = '${data['token']}';
         toastMessage(message: 'Logged In');
         Navigator.pushAndRemoveUntil(context,
             MaterialPageRoute(builder: (context) => Home()), (route) => false);
@@ -223,7 +226,7 @@ class _LoginState extends State<Login> {
       toastMessage(message: 'Invalid email or password');
     }
     setState(() {
-      isLoading=false;
+      isLoading = false;
     });
     return 'Success';
   }

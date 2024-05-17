@@ -4,6 +4,8 @@ import 'package:srr_management/Screens/Home/dashboard.dart';
 import 'package:srr_management/Screens/Home/profile.dart';
 import 'package:srr_management/Screens/Home/taskView.dart';
 import 'package:srr_management/Screens/task/totalTaskList.dart';
+import 'package:srr_management/components/util.dart';
+import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/colors.dart';
 
 class Home extends StatefulWidget {
@@ -16,6 +18,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
   String message = '';
+  bool isLoading = false;
 
   static final List<Widget> _widgetOptions = <Widget>[
     const DashboardView(),
@@ -34,6 +37,17 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    getData();
+  }
+   getData() async {
+    setState(() {
+      isLoading = true;
+    });
+     ServiceManager().getUserData();
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> checkDeviceType() async {
@@ -92,7 +106,7 @@ class _HomeState extends State<Home> {
                 title: Image.asset('images/srr_logo.png', height: 55),
               )
             : null,
-        body: Center(
+        body:isLoading==true?Center(child: LoadingIcon()): Center(
           child: _widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(

@@ -10,13 +10,13 @@ import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
 
-class InProgressTaskListScreen extends StatefulWidget {
+class TodaysTaskListScreen extends StatefulWidget {
   @override
-  _InProgressTaskListScreenState createState() =>
-      _InProgressTaskListScreenState();
+  _TodaysTaskListScreenState createState() =>
+      _TodaysTaskListScreenState();
 }
 
-class _InProgressTaskListScreenState extends State<InProgressTaskListScreen> {
+class _TodaysTaskListScreenState extends State<TodaysTaskListScreen> {
   final StreamController _streamController = StreamController();
 
   @override
@@ -50,7 +50,8 @@ class _InProgressTaskListScreenState extends State<InProgressTaskListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Progress TaskList'),
+     //   centerTitle: true,
+        title: const Text('Todays TaskList'),
       ),
       body: Container(
         decoration: kBackgroundDesign(context),

@@ -267,38 +267,87 @@ class _AdminTaskListState extends State<AdminTaskList>
                               "Select Category:",
                               style: kBoldStyle(),
                             ),
-                            Container(
-                              padding: const EdgeInsets.all(10.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.0),
-                                color: const Color.fromARGB(255, 202, 158, 223),
-                              ),
-                              child: DropdownButton<String>(
-                                value: _selectedCategory,
-                                style: const TextStyle(color: Colors.black),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.transparent,
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 5.0, horizontal: 10.0),
+                              child: Container(
+                                height: 55,
+                                width: MediaQuery.of(context).size.width,
+                                // decoration: dropTextFieldDesign(),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(
+                                      width: 1.5, color: Colors.grey),
                                 ),
-                                onChanged: _onCategoryChanged,
-                                items: <String>[
-                                  'Logistic',
-                                  'Office',
-                                  'Admin',
-                                  'Tender'
-                                ].map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(
-                                      '$value',
-                                      style: kHeaderStyle(
-                                          color: const Color.fromARGB(
-                                              255, 4, 55, 97)),
+                                child: DropdownButtonHideUnderline(
+                                  child: ButtonTheme(
+                                    alignedDropdown: true,
+                                    child: DropdownButton(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      value: _selectedCategory != ''
+                                          ? _selectedCategory
+                                          : null,
+                                      hint: Text('State'),
+                                      items: <String>[
+                                        'Logistic',
+                                        'Office',
+                                        'Admin',
+                                        'Tender'
+                                      ].map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value,style:kHeaderStyle(),),
+                                        );
+                                      }).toList(),
+                                      onChanged:_onCategoryChanged
                                     ),
-                                  );
-                                }).toList(),
+                                  ),
+                                ),
                               ),
                             ),
+                            // Container(
+                            //   width: MediaQuery.of(context).size.width,
+                            //   padding: const EdgeInsets.all(6.0),
+                            //   decoration: BoxDecoration(
+                            //     borderRadius: BorderRadius.circular(15.0),
+                            //     color: const Color.fromARGB(255, 202, 158, 223),
+                            //     boxShadow: [
+                            //       BoxShadow(
+                            //         color: Colors.black.withOpacity(0.1),
+                            //         blurRadius: 8,
+                            //         offset: Offset(0, 4),
+                            //       ),
+                            //     ],
+                            //   ),
+                            //   child: Center(
+                            //     child: DropdownButton<String>(
+                            //       value: _selectedCategory,
+                            //       style: const TextStyle(color: Colors.black),
+                            //       underline: Container(
+                            //         height: 2,
+                            //         color: Colors.transparent,
+                            //       ),
+                            //       onChanged: _onCategoryChanged,
+                            //       items: <String>[
+                            //         'Logistic',
+                            //         'Office',
+                            //         'Admin',
+                            //         'Tender'
+                            //       ].map((String value) {
+                            //         return DropdownMenuItem<String>(
+                            //           value: value,
+                            //           child: Text(
+                            //             '$value',
+                            //             style: kHeaderStyle(
+                            //                 color: const Color.fromARGB(
+                            //                     255, 4, 55, 97)),
+                            //           ),
+                            //         );
+                            //       }).toList(),
+                            //     ),
+                            //   ),
+                            // ),
                             kDivider(),
                             const SizedBox(height: 20),
                             _isLoading

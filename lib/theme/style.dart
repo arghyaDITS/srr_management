@@ -3,7 +3,7 @@ import 'package:srr_management/theme/colors.dart';
 
 TextStyle kHeaderStyle({color,size}) => TextStyle(fontSize: size??18, fontWeight: FontWeight.bold,color: color);
 TextStyle kWhiteHeaderStyle() => TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white);
-TextStyle kBoldStyle() => TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+TextStyle kBoldStyle({color}) => TextStyle(fontSize: 16, fontWeight: FontWeight.w600,color: color);
 TextStyle k14BoldStyle() => TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
 TextStyle k14Text() => TextStyle(fontSize: 14);
 TextStyle k12Text() => TextStyle(fontSize: 12);
@@ -64,7 +64,7 @@ BoxDecoration roundedShadedDesign(context) {
 BoxDecoration blurCurveDecor(BuildContext context) {
   return BoxDecoration(
     color: Theme.of(context).scaffoldBackgroundColor != Colors.black ?
-    Colors.white.withOpacity(0.6) : kDarkColor.withOpacity(0.7),
+    Colors.white.withOpacity(0.9) : kDarkColor.withOpacity(0.7),
     borderRadius: BorderRadius.circular(10.0),
   );
 }

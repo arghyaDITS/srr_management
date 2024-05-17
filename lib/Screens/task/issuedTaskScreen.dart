@@ -191,7 +191,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
                                   style: kBoldStyle(),
                                 ),
                                 Text(
-                                  data[index]['issue_note'],
+                                  data[index]['issue_note']??'',
                                 ),
                               ],
                             ),

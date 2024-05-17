@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:srr_management/Screens/Leave/applyLeave.dart';
 import 'package:srr_management/Screens/Leave/leaveManagement.dart';
+import 'package:srr_management/Screens/Leave/myLeave.dart';
 import 'package:srr_management/Screens/notes/notes.dart';
 import 'package:srr_management/Screens/task/archivedTaskList.dart';
 import 'package:srr_management/Screens/task/createTask.dart';
@@ -166,10 +167,8 @@ class _DashboardViewState extends State<DashboardView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GradientText(
-                          
                             "Welcome\n ${ServiceManager.userName.split(" ")[0]}! ",
                             style: const TextStyle(
-                              
                                 fontSize: 28.0, fontWeight: FontWeight.w700),
                             colors: const [
                               Colors.purple,
@@ -193,7 +192,7 @@ class _DashboardViewState extends State<DashboardView> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          InProgressTaskListScreen()));
+                                          TodaysTaskListScreen()));
                             }),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -393,29 +392,24 @@ class _DashboardViewState extends State<DashboardView> {
                       height: 20,
                     ),
                     Row(
-                      mainAxisAlignment: ServiceManager.roleAs == 'user'
-                          ? MainAxisAlignment.start
-                          : MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Padding(
-                            padding:ServiceManager.roleAs=='user'? EdgeInsets.only(left: 10, right: 20):EdgeInsets.all(0),
-                            child: smallContainer(
-                                color: const Color.fromARGB(255, 192, 63, 23),
-                                text: "In progress",
-                                isIcon: true,
-                                iconData: Icons.run_circle,
-                                onPress: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const TotalTaskList(
-                                                status: "In progress",
-                                              )
-                                          //InProgressTaskListScreen()
-                                          ));
-                                },
-                                quantity: '0')),
+                        smallContainer(
+                            color: const Color.fromARGB(255, 192, 63, 23),
+                            text: "In progress",
+                            isIcon: true,
+                            iconData: Icons.run_circle,
+                            onPress: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const TotalTaskList(
+                                            status: "In Progress",
+                                          )
+                                      //InProgressTaskListScreen()
+                                      ));
+                            },
+                            quantity: '0'),
                         smallContainer(
                             color: Colors.deepOrangeAccent,
                             text: "My Issues",
@@ -431,7 +425,19 @@ class _DashboardViewState extends State<DashboardView> {
                             },
                             quantity: '1'),
                         ServiceManager.roleAs == 'user'
-                            ? Container()
+                            ? smallContainer(
+                                color: const Color.fromARGB(255, 216, 124, 95),
+                                text: "Notes",
+                                isIcon: true,
+                                iconData: Icons.flight_takeoff_outlined,
+                                onPress: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                               AddNoteScreen()));
+                                },
+                                quantity: '3')
                             : smallContainer(
                                 color: const Color.fromARGB(255, 216, 124, 95),
                                 text: "Issues",

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
-import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -50,6 +49,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   String? selectedUser;
   late List<int> selectedUserIds =
       selectedUsers.map((user) => user.id).toList();
+  bool _documentUploaded = false;
 
   @override
   void initState() {
@@ -59,7 +59,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     widget.taskId != null ? getTaskData() : null;
     getUserList();
     selectedUserIds = [];
-   
   }
 
   // void _openFileExplorer() async {
@@ -97,6 +96,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
         setState(() {
           _filePath = file.path; // Update the selected file path
+          _documentUploaded = true;
         });
 
         // Call postTask function with the selected file
@@ -139,6 +139,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         _userList.add(user['name']);
         _userIdList.add(user['id']);
       }
+      await Future.delayed(Duration(seconds: 2));
 
       setState(() {
         isLoading = false;
@@ -198,7 +199,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     });
     String url = APIData.getTaskById;
     print(url);
-
+    await Future.delayed(Duration(seconds: 1));
     var res = await http.post(Uri.parse(url), headers: {
       'Accept': 'application/json',
       'Authorization': 'Bearer ${ServiceManager.tokenID}',
@@ -210,7 +211,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       print(res.body);
 
       var data = jsonDecode(res.body);
-      
+
       _titleController.text = data['task']['title'];
       _descriptionController.text = data['task']['description'];
       _startDate = DateTime.parse(data['task']['start_date']);
@@ -221,22 +222,23 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ? "Low"
               : "Medium";
       category = data['task']['category_id'];
-     var idList =data['task']['user_ids'];
-     print(idList);
-     assignedUserIdList = idList.map((id) => int.parse(id)).toList();
+      var idList = data['task']['user_ids'];
+      print(idList);
+      assignedUserIdList = idList.map((id) => int.parse(id)).toList();
       print(assignedUserIdList);
-       if (widget.taskId != null) {
-      for (int userId in assignedUserIdList) {
-        int index = _userIdList.indexOf(userId);
-        if (index != -1) {
-          selectedUsers.add(Users(name: _userList[index], id: userId));
+      if (widget.taskId != null) {
+        for (int userId in assignedUserIdList) {
+          int index = _userIdList.indexOf(userId);
+          if (index != -1) {
+            selectedUsers.add(Users(name: _userList[index], id: userId));
+          }
         }
+        print("**************");
+        print(selectedUsers[0].name);
+        print(assignedUserIdList.length);
+        print("**************");
       }
-      print("**************");
-      print(selectedUsers[0].name);
-      print(assignedUserIdList.length);
-      print("**************");
-    }
+      await Future.delayed(Duration(seconds: 2));
 
       setState(() {
         isLoading = false;
@@ -329,290 +331,372 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     selectedUserIds = selectedUsers.map((user) => user.id).toList();
   }
 
+  String _getFileName(String path) {
+    List<String> parts = path.split('/');
+    return parts.last;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.taskId == null ? 'Create Task' : "Edit Task"),
       ),
-      body: Container(
-        decoration: kBackgroundDesign(context),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  //------Title--------
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Task Title',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter text';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16.0),
-                  //------Desc--------
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Task Description',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter text';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16.0),
-                  //------Priority--------
-                  DropdownButtonFormField<String>(
-                    value: _selectedPriority,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedPriority = value!;
-                      });
-                    },
-                    items: <String>['High', 'Medium', 'Low']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Priority',
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  //------Category--------
-                  DropdownButtonFormField<String>(
-                    value: category,
-                    onChanged: (value) {
-                      setState(() {
-                        category = value!;
-                      });
-                    },
-                    items: <String>['Logistic', 'Office', 'Admin', 'Tender']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Select Category',
-                    ),
-                  ),
+      body: isLoading == true
+          ? Center(
+              child: LoadingIcon(),
+            )
+          : Container(
+              decoration: kBackgroundDesign(context),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        //------Title--------
+                        TextFormField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Task Title',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter text';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
+                        //------Desc--------
+                        TextFormField(
+                          maxLength: 100,
+                          controller: _descriptionController,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Task Description',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter text';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
+                        // Padding(
+                        //   padding: EdgeInsets.symmetric(
+                        //       vertical: 5.0, horizontal: 10.0),
+                        //   child: Container(
+                        //     height: 55,
+                        //     width: MediaQuery.of(context).size.width,
+                        //     // decoration: dropTextFieldDesign(),
+                        //     decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(10.0),
+                        //       border:
+                        //           Border.all(width: 1.5, color: Colors.grey),
+                        //     ),
+                        //     child: DropdownButtonHideUnderline(
+                        //       child: ButtonTheme(
+                        //         alignedDropdown: true,
+                        //         child: DropdownButton(
+                        //           borderRadius: BorderRadius.circular(10.0),
+                        //           value: _selectedPriority != ''
+                        //               ? _selectedPriority
+                        //               : null,
+                        //           hint: Text('State'),
+                        //           items: <String>['High', 'Medium', 'Low']
+                        //               .map<DropdownMenuItem<String>>(
+                        //                   (String value) {
+                        //             return DropdownMenuItem<String>(
+                        //               value: value,
+                        //               child: Text(value),
+                        //             );
+                        //           }).toList(),
+                        //           onChanged: (String? newValue) {
+                        //             setState(() {
+                        //               _selectedPriority = newValue!;
+                        //             });
+                        //           },
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        //------Priority--------
+                        DropdownButtonFormField<String>(
+                          padding: EdgeInsets.zero,
+                          value: _selectedPriority,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedPriority = value!;
+                            });
+                          },
+                          items: <String>['High', 'Medium', 'Low']
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Priority',
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        //------Category--------
+                        DropdownButtonFormField<String>(
+                          value: category,
+                          onChanged: (value) {
+                            setState(() {
+                              category = value!;
+                            });
+                          },
+                          items: <String>[
+                            'Logistic',
+                            'Office',
+                            'Admin',
+                            'Tender'
+                          ].map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Select Category',
+                          ),
+                        ),
 
-                  const SizedBox(height: 16.0),
-                  //_________________________________________________
-                  userSelectionWidget(),
+                        const SizedBox(height: 16.0),
+                        //_________________________________________________
+                        userSelectionWidget(),
 
 //_______________________________________--
 
-                  // DropdownButtonFormField<String>(
-                  //   value: _selectedUser != '' ? _selectedUser : null,
-                  //   onChanged: (value) {
-                  //     setState(() {
-                  //       _selectedUser = value!;
-                  //     });
-                  //   },
-                  //   items:
-                  //       _userList.map<DropdownMenuItem<String>>((String value) {
-                  //     return DropdownMenuItem<String>(
-                  //       value: value,
-                  //       child: Text(value),
-                  //     );
-                  //   }).toList(),
-                  //   decoration: const InputDecoration(
-                  //     border: OutlineInputBorder(),
-                  //     labelText: 'Select Category',
-                  //   ),
-                  // ),
-                  //__________________________________________________________
-                  //userField(),
-                  //const SizedBox(height: 16.0),
-                  // isMoreMember
-                  //     ? DropdownButtonFormField<String>(
-                  //         value: _selectedUser2 != '' ? _selectedUser2 : null,
-                  //         onChanged: (value) {
-                  //           setState(() {
-                  //             _selectedUser2 = value!;
-                  //             //  isMoreMember=false;
-                  //           });
-                  //         },
-                  //         items: _userList
-                  //             .map<DropdownMenuItem<String>>((String value) {
-                  //           return DropdownMenuItem<String>(
-                  //             value: value,
-                  //             child: Text(value),
-                  //           );
-                  //         }).toList(),
-                  //         decoration: const InputDecoration(
-                  //           border: OutlineInputBorder(),
-                  //           labelText: 'Select Category',
-                  //         ),
-                  //       )
-                  //     : Container(),
+                        // DropdownButtonFormField<String>(
+                        //   value: _selectedUser != '' ? _selectedUser : null,
+                        //   onChanged: (value) {
+                        //     setState(() {
+                        //       _selectedUser = value!;
+                        //     });
+                        //   },
+                        //   items:
+                        //       _userList.map<DropdownMenuItem<String>>((String value) {
+                        //     return DropdownMenuItem<String>(
+                        //       value: value,
+                        //       child: Text(value),
+                        //     );
+                        //   }).toList(),
+                        //   decoration: const InputDecoration(
+                        //     border: OutlineInputBorder(),
+                        //     labelText: 'Select Category',
+                        //   ),
+                        // ),
+                        //__________________________________________________________
+                        //userField(),
+                        //const SizedBox(height: 16.0),
+                        // isMoreMember
+                        //     ? DropdownButtonFormField<String>(
+                        //         value: _selectedUser2 != '' ? _selectedUser2 : null,
+                        //         onChanged: (value) {
+                        //           setState(() {
+                        //             _selectedUser2 = value!;
+                        //             //  isMoreMember=false;
+                        //           });
+                        //         },
+                        //         items: _userList
+                        //             .map<DropdownMenuItem<String>>((String value) {
+                        //           return DropdownMenuItem<String>(
+                        //             value: value,
+                        //             child: Text(value),
+                        //           );
+                        //         }).toList(),
+                        //         decoration: const InputDecoration(
+                        //           border: OutlineInputBorder(),
+                        //           labelText: 'Select Category',
+                        //         ),
+                        //       )
+                        //     : Container(),
 
-                  const SizedBox(height: 10),
+                        const SizedBox(height: 10),
 
-                  const Text(
-                    'Start Date:',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  //const SizedBox(height: 10.0),
-
-                  GestureDetector(
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2101),
-                      );
-                      if (picked != null && picked != _startDate) {
-                        setState(() {
-                          _startDate = picked;
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 10),
-                      height: 50,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black, // Specify your border color here
-                          width: 0.7, // Specify the width of the border
+                        const Text(
+                          'Start Date:',
+                          style: TextStyle(fontWeight: FontWeight.w500),
                         ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_startDate != null
-                              ? DateFormat('yyyy-MM-dd')
-                                  .format(
-                                      DateTime.parse(_startDate!.toString()))
-                                  .toString()
-                              : 'Select Start Date'),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10.0),
-                  const Text(
-                    'End Date:',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  // const SizedBox(height: 10.0),
+                        //const SizedBox(height: 10.0),
 
-                  GestureDetector(
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2101),
-                      );
-                      if (picked != null && picked != _endDate) {
-                        setState(() {
-                          _endDate = picked;
-                        });
-                        if (_startDate != null && _endDate != null) {
-                          _calculateDifference();
-                        }
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 10),
-                      height: 50,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black, // Specify your border color here
-                          width: 0.7, // Specify the width of the border
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_endDate != null
-                              ? DateFormat('yyyy-MM-dd')
-                                  .format(DateTime.parse(_endDate!.toString()))
-                                  .toString()
-                              : 'Select End Date'),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  (_startDate != null && _endDate != null)
-                      ? Text(
-                          'Duration: ${_calculateDifference()}',
-                          style: const TextStyle(fontSize: 16),
-                        )
-                      : Container(),
-                  ElevatedButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    }, //_openFileExplorer,
-                    child: const Text('Upload Document'),
-                  ),
-                  _filePath.isNotEmpty
-                      ? Text('Selected File: $_filePath')
-                      : const SizedBox(),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate() &&
-                          _startDate != null &&
-                          _endDate != null) {
-                        print("yes");
-                        widget.taskId != null
-                            ? editTask()
-                            : _filePath == ''
-                                ? postTask()
-                                : await postTaskwithFile(
-                                    file: _filePath != ''
-                                        ? File(_filePath)
-                                        : null);
-                      } else {
-                        print("No");
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please fill the inputs"),
+                        GestureDetector(
+                          onTap: () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _startDate ?? DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(2101),
+                            );
+                            if (picked != null && picked != _startDate) {
+                              setState(() {
+                                _startDate = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.only(left: 10),
+                            height: 50,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors
+                                    .black, // Specify your border color here
+                                width: 0.7, // Specify the width of the border
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_startDate != null
+                                    ? DateFormat('yyyy-MM-dd')
+                                        .format(DateTime.parse(
+                                            _startDate!.toString()))
+                                        .toString()
+                                    : 'Select Start Date'),
+                              ],
+                            ),
                           ),
-                        );
-                      }
+                        ),
+                        const SizedBox(height: 10.0),
+                        const Text(
+                          'End Date:',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        // const SizedBox(height: 10.0),
 
-                      // Handle task creation here
-                      // print('Task Title: ${_titleController.text}');
-                      // print('Task Description: ${_descriptionController.text}');
-                      // print('Priority: $_selectedPriority');
-                      // print('Assigned User: $_selectedUser');
-                    },
-                    child: Text(
-                        widget.taskId != null ? 'Edit Task' : 'Create Task'),
+                        GestureDetector(
+                          onTap: () async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _endDate ?? DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(2101),
+                            );
+                            if (picked != null && picked != _endDate) {
+                              setState(() {
+                                _endDate = picked;
+                              });
+                              if (_startDate != null && _endDate != null) {
+                                _calculateDifference();
+                              }
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.only(left: 10),
+                            height: 50,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors
+                                    .black, // Specify your border color here
+                                width: 0.7, // Specify the width of the border
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_endDate != null
+                                    ? DateFormat('yyyy-MM-dd')
+                                        .format(DateTime.parse(
+                                            _endDate!.toString()))
+                                        .toString()
+                                    : 'Select End Date'),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+                        (_startDate != null && _endDate != null)
+                            ? Text(
+                                'Duration: ${_calculateDifference()}',
+                                style: const TextStyle(fontSize: 16),
+                              )
+                            : Container(),
+                        ElevatedButton(
+                          onPressed: () {
+                            _openFileExplorer();
+                          }, //_openFileExplorer,
+                          child: const Text('Upload Document'),
+                        ),
+                        _documentUploaded
+                            ? Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      '${_filePath.isNotEmpty ? _getFileName(_filePath) : ''}',
+                                      style: kBoldStyle(
+                                          color: const Color.fromARGB(
+                                              255, 8, 65, 113)),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.remove_circle),
+                                    onPressed: () {
+                                      setState(() {
+                                        _filePath = ''; // Clear the file path
+                                        _documentUploaded =
+                                            false; // Update the document status
+                                      });
+                                    },
+                                  ),
+                                ],
+                              )
+                            : SizedBox(),
+                        // _filePath.isNotEmpty
+                        //     ? Text('Selected File: $_filePath')
+                        //     : const SizedBox(),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate() &&
+                                _startDate != null &&
+                                _endDate != null) {
+                              print("yes");
+                              widget.taskId != null
+                                  ? editTask()
+                                  : _filePath == ''
+                                      ? postTask()
+                                      : await postTaskwithFile(
+                                          file: _filePath != ''
+                                              ? File(_filePath)
+                                              : null);
+                            } else {
+                              print("No");
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Please fill the inputs"),
+                                ),
+                              );
+                            }
+
+                            // Handle task creation here
+                            // print('Task Title: ${_titleController.text}');
+                            // print('Task Description: ${_descriptionController.text}');
+                            // print('Priority: $_selectedPriority');
+                            // print('Assigned User: $_selectedUser');
+                          },
+                          child: Text(widget.taskId != null
+                              ? 'Edit Task'
+                              : 'Create Task'),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 

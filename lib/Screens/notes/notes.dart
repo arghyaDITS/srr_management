@@ -91,7 +91,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     print(_textController.text);
     print(url.toString());
     var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
-      'id':noteId.toString(),
+      'id': noteId.toString(),
       "title": "test",
       "description": _textController.text,
       "user_id": ServiceManager.userID
@@ -156,7 +156,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Card(
                                   elevation: 2,
-                                  color: const Color.fromARGB(255, 246, 229, 250),
+                                  color:
+                                      const Color.fromARGB(255, 246, 229, 250),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Row(
@@ -183,8 +184,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                                     child: Card(
                                       color: Color.fromARGB(255, 238, 214, 255),
                                       child: ListTile(
-                                        title:
-                                            Text(notes[index]['description'],style: kBoldStyle(),),
+                                        title: Text(
+                                          notes[index]['description'],
+                                          style: kBoldStyle(),
+                                        ),
                                         trailing: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
@@ -242,6 +245,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
+                 maxLength: 150,
                 controller: _textController,
                 decoration: const InputDecoration(labelText: 'Enter your note'),
                 maxLines: 2,
@@ -255,9 +259,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       setState(() {
                         // notes.add(Note(text: _textController.text));
 
-                       noteID!=null?updateNote(noteID): createNote();
-                        _textController.clear();
-                        Navigator.of(context).pop();
+                        if (_textController.text.isNotEmpty) {
+                          noteID != null ? updateNote(noteID) : createNote();
+                          _textController.clear();
+                          Navigator.of(context).pop();
+                        } else {
+                          Navigator.of(context).pop();
+                        }
                       });
                     },
                     child: Text(noteID != null ? 'Update' : 'Save'),

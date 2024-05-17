@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -36,6 +37,7 @@ class _LeaveManagementState extends State<LeaveManagement>
 
   getemployeeLeavesData() async {
     String url = APIData.getTotalLeaveList;
+    print(url.toString());
     var res = await http.get(Uri.parse(url), headers: {
       'Accept': 'application/json',
       'Authorization': 'Bearer ${ServiceManager.tokenID}',
@@ -75,6 +77,7 @@ class _LeaveManagementState extends State<LeaveManagement>
     } catch (e) {
       print(e.toString());
     } finally {
+      getemployeeLeavesData();
       isLoading = false;
     }
   }
@@ -207,6 +210,20 @@ class _LeaveManagementState extends State<LeaveManagement>
                                   ),
                                 ],
                               ),
+                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Description: ',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600)),
+                                  Expanded(
+                                    child: Text(
+                                      data[index]['leave_desc'] ,
+                                     
+                                    ),
+                                  ),
+                                ],
+                              ),
                               kSpace(),
                               Row(
                                 children: [
@@ -254,7 +271,7 @@ class _LeaveManagementState extends State<LeaveManagement>
                           ),
                         ),
                       ),
-                      leaveResposed == false
+                      leaveResposed == false||data[index]['status']==0
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -282,14 +299,15 @@ class _LeaveManagementState extends State<LeaveManagement>
                                 ),
                               ],
                             )
-                          : Container()
+                          : Container(),
+                         
                     ],
                   ),
                 )
               : Container();
         },
         separatorBuilder: (BuildContext context, int index) {
-          return kSpace(height: 30.0);
+          return kSpace(height: 10.0);
         },
       ),
     );

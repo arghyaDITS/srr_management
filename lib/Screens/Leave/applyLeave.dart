@@ -49,7 +49,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
 
       print(data['data'][0]['leave_type']);
       // print(data['data']['leave_type']);
-      _leaveDescriptionController.text = data['data'][0]['leave_desc']??'';
+      _leaveDescriptionController.text = data['data'][0]['leave_desc'] ?? '';
       _leaveType = data['data'][0]['leave_type'];
       _fromDate = DateTime.parse(data['data'][0]['from_date']);
       _toDate = DateTime.parse(data['data'][0]['to_date']);
@@ -63,9 +63,8 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
   }
 
   applyLeave() async {
-    
-      isLoading = true;
-    
+    isLoading = true;
+
     String url = APIData.applyLeave;
     print(ServiceManager.userID);
     print(url.toString());
@@ -83,21 +82,19 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
       print(res.body);
       var data = jsonDecode(res.body);
       print(data.toString());
-      
-        isLoading = false;
-     
+
+      isLoading = false;
     }
     return 'Success';
   }
-  editLeave()async{
-     setState(() {
-      isLoading = true;
-    });
+
+  editLeave() async {
+     isLoading = true;
     String url = APIData.editLeave;
     print(ServiceManager.userID);
     print(url.toString());
     var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
-      'id':widget.leaveId,
+      'id': widget.leaveId.toString(),
       'user_id': ServiceManager.userID,
       'leave_type': _leaveType,
       'total_days': _numberOfDays.toString(),
@@ -111,12 +108,9 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
       print(res.body);
       var data = jsonDecode(res.body);
       print(data.toString());
-      setState(() {
         isLoading = false;
-      });
     }
     return 'Success';
-
   }
 
   @override
@@ -247,7 +241,9 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
                                       message: 'Please fill all fields');
                                   return; // Exit function if validation fails
                                 } else {
-                                  applyLeave();
+                                  widget.leaveId != null
+                                      ? editLeave()
+                                      : applyLeave();
                                   Navigator.pop(context);
                                 }
 

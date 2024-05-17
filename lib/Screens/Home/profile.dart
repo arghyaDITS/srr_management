@@ -149,11 +149,15 @@ class _ProfileViewState extends State<ProfileView> {
                                       Colors.black
                                   ? kMainColor
                                   : kDarkColor,
-                          child: const CircleAvatar(
+                          child: ServiceManager.profileURL == ''? const CircleAvatar(
                             radius: 45,
                             backgroundImage:
                                 AssetImage('images/img_blank_profile.png'),
-                          )),
+                          ):CircleAvatar(
+                                radius: 70,
+                                backgroundImage:
+                                    NetworkImage(ServiceManager.profileURL),
+                              )),
                     ],
                   ),
                 ],
