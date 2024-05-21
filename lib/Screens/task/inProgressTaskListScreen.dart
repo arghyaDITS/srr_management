@@ -12,8 +12,7 @@ import 'package:http/http.dart' as http;
 
 class TodaysTaskListScreen extends StatefulWidget {
   @override
-  _TodaysTaskListScreenState createState() =>
-      _TodaysTaskListScreenState();
+  _TodaysTaskListScreenState createState() => _TodaysTaskListScreenState();
 }
 
 class _TodaysTaskListScreenState extends State<TodaysTaskListScreen> {
@@ -25,6 +24,7 @@ class _TodaysTaskListScreenState extends State<TodaysTaskListScreen> {
     super.initState();
     getTodaysTaskList();
   }
+
   getTodaysTaskList() async {
     String url = APIData.todaysTaskListForUser;
     print(url);
@@ -50,7 +50,7 @@ class _TodaysTaskListScreenState extends State<TodaysTaskListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-     //   centerTitle: true,
+        //   centerTitle: true,
         title: const Text('Todays TaskList'),
       ),
       body: Container(
@@ -71,39 +71,63 @@ class _TodaysTaskListScreenState extends State<TodaysTaskListScreen> {
                           //  physics: const NeverScrollableScrollPhysics(),
                           itemCount: data.length,
                           itemBuilder: (context, index) {
-                            return Card(
-                              color: Color.fromARGB(255, 245, 236, 255),
-                              elevation: 2,
-                              child: ListTile(
-                                onTap: (){
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              TaskDetailsScreen(
-                                                  taskId: data[index]['id'])));
-                                },
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      data[index]['title'],
-                                      style: kBoldStyle(),
-                                    ),
-                                    Text(
-                                       data[index]['description'],
-                                      style: k16Style(),
-                                    ),
-                                  ],
+                            return Container(
+                              decoration: BoxDecoration(
+                                color:data[index]['priority']=='low'? Color.fromARGB(255, 245, 236, 255):data[index]['priority']=='low'?Color.fromARGB(255, 245, 236, 255):Color.fromARGB(255, 245, 236, 255),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(
+                                        0, 3), // changes position of shadow
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Colors.purple.withOpacity(0.5),
+                                  width: 1,
                                 ),
-                                // subtitle: LinearProgressIndicator(
-                                //   minHeight: 6.0,
-                                //   value: tasks[index].progress,
-                                //   backgroundColor: Colors.grey[300],
-                                //   valueColor:
-                                //       const AlwaysStoppedAnimation<Color>(
-                                //           Color.fromARGB(144, 27, 75, 119)),
-                                // ),
+                              ),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TaskDetailsScreen(
+                                        taskId: data[index]['id'],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        data[index]['title'],
+                                        style: kBoldStyle(),
+                                      ),
+                                      SizedBox(height: 5),
+                                      Text(
+                                        data[index]['description'],
+                                        style: k16Style(),
+                                      ),
+                                      SizedBox(height: 10),
+                                      // LinearProgressIndicator(
+                                      //   minHeight: 6.0,
+                                      //   value: tasks[index].progress,
+                                      //   backgroundColor: Colors.grey[300],
+                                      //   valueColor:
+                                      //       const AlwaysStoppedAnimation<Color>(
+                                      //     Color.fromARGB(144, 27, 75, 119),
+                                      //   ),
+                                      // ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             );
                           },

@@ -9,15 +9,15 @@ import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 
-class TotalTaskList extends StatefulWidget {
+class FailedTaskList extends StatefulWidget {
   final String status;
-  const TotalTaskList({super.key, required this.status});
+  const FailedTaskList({super.key, required this.status});
 
   @override
-  State<TotalTaskList> createState() => _TotalTaskListState();
+  State<FailedTaskList> createState() => _FailedTaskListState();
 }
 
-class _TotalTaskListState extends State<TotalTaskList> {
+class _FailedTaskListState extends State<FailedTaskList> {
   final StreamController _streamController = StreamController();
 
   @override
@@ -25,7 +25,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
     // TODO: implement initState
     super.initState();
     print(widget.status);
-    getUserTotalTaskData();
+    getFailedTaskData();
   }
 
   @override
@@ -35,14 +35,12 @@ class _TotalTaskListState extends State<TotalTaskList> {
     _streamController.close();
   }
 
-  taskElement({taskName, desc, status, color, onPress}) {
+  taskElement({taskName, desc, color, onPress}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: status != 'Completed'
-              ? Colors.white
-              : const Color.fromARGB(255, 197, 198, 199),
+          color:Color.fromARGB(255, 235, 202, 202),
           border: Border.all(color: Colors.grey, width: 1.5),
           borderRadius: BorderRadius.circular(15.0),
         ),
@@ -54,8 +52,8 @@ class _TotalTaskListState extends State<TotalTaskList> {
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 25,
-                  backgroundImage: AssetImage('images/logo.jpg'),
+                  radius: 26,
+                  backgroundImage: AssetImage('images/failed_task.png'),
                   backgroundColor: Colors.transparent,
                 ),
                 const SizedBox(width: 10),
@@ -68,9 +66,8 @@ class _TotalTaskListState extends State<TotalTaskList> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: status == 'Completed'
-                              ? Colors.grey
-                              : Colors.black,
+                          color: 
+                               Color.fromARGB(255, 115, 1, 1),
                         ),
                       ),
                       const SizedBox(height: 5),
@@ -78,9 +75,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
                         desc,
                         style: TextStyle(
                           fontSize: 14,
-                          color: status == 'Completed'
-                              ? Colors.grey
-                              : Colors.black54,
+                          color: const Color.fromARGB(137, 106, 3, 3),
                         ),
                       ),
                     ],
@@ -89,7 +84,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
                 const SizedBox(width: 10),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: status == 'Completed' ? Colors.grey : Colors.black,
+                  color:  Colors.black,
                 ),
               ],
             ),
@@ -99,43 +94,13 @@ class _TotalTaskListState extends State<TotalTaskList> {
     );
   }
 
-  taskElement2({taskName, desc, status, color, onPress}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-      child: Card(
-        color: status != 'Completed'
-            ? Colors.white
-            : const Color.fromARGB(255, 197, 198, 199),
-        elevation: 2,
-        child: ListTile(
-          leading: Image.asset(
-            'images/logo.jpg',
-            width: 50,
-            height: 50,
-          ),
-          title: Text(taskName),
-          subtitle: Text(desc),
-          trailing: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.arrow_forward),
-            ],
-          ),
-          onTap: onPress,
-        ),
-      ),
-    );
-  }
-
-  getUserTotalTaskData() async {
-    String url = APIData.getUserTotalTask;
+  getFailedTaskData() async {
+    String url = "${APIData.getFailedTask}/${ServiceManager.userID}";
     print(url);
 
-    var res = await http.post(Uri.parse(url), headers: {
+    var res = await http.get(Uri.parse(url), headers: {
       'Accept': 'application/json',
       'Authorization': 'Bearer ${ServiceManager.tokenID}',
-    }, body: {
-      'user_id': ServiceManager.userID
     });
     print(res.statusCode);
     if (res.statusCode == 200) {
@@ -143,7 +108,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
 
       var data = jsonDecode(res.body);
 
-      _streamController.add(data['task']);
+      _streamController.add(data['failed_task']);
     }
     return 'Success';
   }
@@ -153,7 +118,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "${widget.status} Task"),
+          "Failed Task"),
             //widget.status == 'Completed' ? 'Completed Task' : 'My Total Tasks'),
       ),
       body: Container(
@@ -162,19 +127,19 @@ class _TotalTaskListState extends State<TotalTaskList> {
             stream: _streamController.stream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                var snapData = snapshot.data;
+                var data = snapshot.data;
                 // print(data.toString());
                 // print(data.length);
-                List data = [];
-                if (widget.status == null || widget.status == 'Total') {
-                  data = snapData;
-                } else {
-                  for (var item in snapData) {
-                    if (item['status'] == widget.status) {
-                      data.add(item);
-                    }
-                  }
-                }
+                // List data = [];
+                // if (widget.status == null || widget.status == 'Total') {
+                //   data = snapData;
+                // } else {
+                //   for (var item in snapData) {
+                //     if (item['status'] == widget.status) {
+                //       data.add(item);
+                //     }
+                //   }
+                // }
 
                 return data.isNotEmpty
                     ? Container(
@@ -196,7 +161,7 @@ class _TotalTaskListState extends State<TotalTaskList> {
                                 return taskElement(
                                   taskName: data[index]['title'],
                                   desc: data[index]['description'],
-                                  status: data[index]['status'],
+                                 // status: data[index]['status'],
                                   onPress: () {
                                     Navigator.push(
                                         context,

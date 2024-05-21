@@ -1,82 +1,59 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
 
-class LeaveReportScreen extends StatefulWidget {
-  String? userId;
-  LeaveReportScreen({super.key,  this.userId});
+class TaskReportScreen extends StatefulWidget {
+  TaskReportScreen({super.key});
+
   @override
-  State<LeaveReportScreen> createState() => _LeaveReportScreenState();
+  State<TaskReportScreen> createState() => _TaskReportScreenState();
 }
 
-class _LeaveReportScreenState extends State<LeaveReportScreen> {
+class _TaskReportScreenState extends State<TaskReportScreen> {
   bool isLoading = false;
-  final StreamController _streamController = StreamController();
-  String accepted = "";
-  String declined = "";
   String pending = "";
-  String total="";
+  String inProgress = "";
+  String completed = "";
+  String faild = "";
 
   @override
   void initState() {
     super.initState();
-    getLeaveReportData(widget.userId);
-    getMonthName(12);
+    getReportData();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    _streamController.close();
-  }
-
-  String getMonthName(int monthNumber) {
-    // Creating a DateTime object with the year 2022 and the given month number
-    DateTime dateTime = DateTime(2022, monthNumber);
-
-    // Formatting the DateTime object to get the month name
-    String monthName = DateFormat('MMMM').format(dateTime);
-    return monthName;
-  }
-
-  getLeaveReportData(userId) async {
+  getReportData() async {
     setState(() {
       isLoading = true;
     });
-    String url = "${APIData.leaveReportForUser}/$userId";
+    String url = "${APIData.taskCountDataforUser}/${ServiceManager.userID}";
     print(url);
     await Future.delayed(Duration(seconds: 1));
-
-    var res = await http.get(
-      Uri.parse(url),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ${ServiceManager.tokenID}',
-      },
-    );
+    var res = await http.get(Uri.parse(url), headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${ServiceManager.tokenID}',
+    });
     print(res.statusCode);
     if (res.statusCode == 200) {
       print(res.body);
-      var data = jsonDecode(res.body);
-      print(data.toString());
-      print(data);
-      pending = data['data']['pendingLeave'].toString();
-      accepted = data['data']['approveLeave'].toString();
-      declined = data['data']['declineLeave'].toString();
-     
 
-      setState(() {
-        isLoading = false;
-      });
+      var data = jsonDecode(res.body);
+      print(data);
+      pending = data['yet_to_start_task'].toString();
+      inProgress = data['in_progress_task'].toString();
+      completed = data['completed_task'].toString();
+      faild = data['failed_task'].toString();
     }
+
+    //   _streamController.add(data['task']);
+    setState(() {
+      isLoading = false;
+    });
     return 'Success';
   }
 
@@ -84,7 +61,7 @@ class _LeaveReportScreenState extends State<LeaveReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Leave Report'),
+        title: Text('Task Report'),
       ),
       body: isLoading == true
           ? Center(
@@ -109,11 +86,12 @@ class _LeaveReportScreenState extends State<LeaveReportScreen> {
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                         children: [
-                          _buildLeaveCard('Pending Leave', pending, Colors.blue),
-                          _buildLeaveCard(
-                              'Accepted Leave', accepted, Colors.green),
-                          _buildLeaveCard(
-                              'Declined Leave', declined, Colors.orange),
+                          _buildTaskCard('Yet to Start', pending, Colors.blue),
+                          _buildTaskCard(
+                              'In Progress Tasks', inProgress, Colors.green),
+                          _buildTaskCard(
+                              'Completed Tasks', completed, Colors.orange),
+                          _buildTaskCard('Failed Tasks', faild, Colors.red),
                         ],
                       ),
                     ),
@@ -124,7 +102,7 @@ class _LeaveReportScreenState extends State<LeaveReportScreen> {
     );
   }
 
-  Widget _buildLeaveCard(String title, String count, Color color) {
+  Widget _buildTaskCard(String title, String count, Color color) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),

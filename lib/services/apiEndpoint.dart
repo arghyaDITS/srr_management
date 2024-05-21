@@ -20,11 +20,13 @@ class APIData {
   static const String getAllTaskForAdmin = '${baseURL}api/get_task';
   static const String getTaskById = '${baseURL}api/get_task_by_id';
   static const String deleteTaskByAdmin = '${baseURL}api/delete_task';
+  static const String taskCountDataforUser = '${baseURL}api/task_count';
 
   //user task
   static const String getUserTotalTask = '${baseURL}api/get_task_for_user';
 
   static const String changeTaskStatus = '${baseURL}api/task_status_update';
+  static const String getFailedTask = '${baseURL}api/failed_task';
   //issue task
   static const String createIssue = '${baseURL}api/create_task_issue';
   static const String getIssue = '${baseURL}api/get_issue_for_admin';

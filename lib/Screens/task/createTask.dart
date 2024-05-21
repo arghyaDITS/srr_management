@@ -266,6 +266,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           },
           textSubmitted: (text) {
             setState(() {
+               if (_userList.contains(text) && !selectedUsers.any((user) => user.name == text)) {
               int userId = _userIdList[_userList.indexOf(text)];
               selectedUsers.add(Users(name: text, id: userId));
               print(selectedUsers.toList());
@@ -274,6 +275,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               // if (!selectedUsers.contains(text)) {
               //   selectedUsers.add(text);
               // }
+               }
             });
           },
         ),
@@ -662,7 +664,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate() &&
                                 _startDate != null &&
-                                _endDate != null) {
+                                _endDate != null && selectedUserIds.isNotEmpty) {
                               print("yes");
                               widget.taskId != null
                                   ? editTask()
@@ -721,12 +723,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => const Home()));
     } else {
-      print(res.body);
-    }
+        print("sdfff");
+        print(res.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+          content: Text(json.decode(res.body)['message']),
+        ),
+      );
+      }
     return 'Success';
   }
 
   postTaskwithFile({File? file}) async {
+    print("postTaskwithFile");
     String url = APIData.createTask;
     print(url.toString());
     var request = http.MultipartRequest('POST', Uri.parse(url));
@@ -773,36 +782,61 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => const Home()));
     } else {
-      print(res.body);
-    }
+        print("sdfff");
+        print(res.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+          content: Text(json.decode(res.body)['message']),
+        ),
+      );
+      }
     return 'Success';
   }
 
   postTask() async {
+    print("postTask");
     String url = APIData.createTask;
     print(url.toString());
-    var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
-      'title': _titleController.text,
-      'description': _descriptionController.text,
-      'start_date': _startDate.toString(),
-      'end_date': _endDate.toString(),
-      'user_ids': jsonEncode(selectedUserIds
-          .map((int number) => number.toString())
-          .toList()), // jsonEncode(selectedUserIds),
-      'category_id': category,
-      'priority': _selectedPriority,
-    });
-
-    if (res.statusCode == 200) {
-      toastMessage(message: 'Task Created');
-      print(res.body);
-      var data = jsonDecode(res.body);
-      print(data.toString());
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const Home()));
-    } else {
-      print(res.body);
+    try {
+      var res =
+          await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
+        'title': _titleController.text,
+        'description': _descriptionController.text,
+        'start_date': _startDate.toString(),
+        'end_date': _endDate.toString(),
+        'user_ids': jsonEncode(selectedUserIds
+            .map((int number) => number.toString())
+            .toList()), // jsonEncode(selectedUserIds),
+        'category_id': category,
+        'priority': _selectedPriority,
+      });
+      if (res.statusCode == 200) {
+        toastMessage(message: 'Task Created');
+        print(res.body);
+        var data = jsonDecode(res.body);
+        print(data.toString());
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const Home()));
+      } else {
+        print("sdfff");
+        print(res.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+          content: Text(json.decode(res.body)['message']),
+        ),
+      );
+      }
+      return 'Success';
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Something went wrong!"),
+        ),
+      );
+      // Handle the error here, such as displaying an error message to the user.
+      // You might also want to log the error or perform other actions based on your application's requirements.
+      return 'Error: $e';
     }
-    return 'Success';
   }
 }

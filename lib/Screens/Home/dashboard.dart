@@ -6,6 +6,7 @@ import 'package:srr_management/Screens/Leave/myLeave.dart';
 import 'package:srr_management/Screens/notes/notes.dart';
 import 'package:srr_management/Screens/task/archivedTaskList.dart';
 import 'package:srr_management/Screens/task/createTask.dart';
+import 'package:srr_management/Screens/task/failedTaskList.dart';
 import 'package:srr_management/Screens/task/inProgressTaskListScreen.dart';
 import 'package:srr_management/Screens/task/issuedTaskScreen.dart';
 import 'package:srr_management/Screens/task/planningTask.dart';
@@ -201,7 +202,7 @@ class _DashboardViewState extends State<DashboardView> {
                                 height: 100.0,
                                 width: 130.0,
                                 iconData: Icons.task,
-                                text2: "Total Task",
+                                text2: "In Progress",
                                 fontsize: 14.0,
                                 onPress: () {
                                   Navigator.push(
@@ -209,7 +210,7 @@ class _DashboardViewState extends State<DashboardView> {
                                       MaterialPageRoute(
                                           builder: (context) =>
                                               const TotalTaskList(
-                                                status: "Total",
+                                                status: "In Progress",
                                               )));
                                 }),
                             const SizedBox(
@@ -396,14 +397,14 @@ class _DashboardViewState extends State<DashboardView> {
                       children: [
                         smallContainer(
                             color: const Color.fromARGB(255, 192, 63, 23),
-                            text: "In progress",
+                            text: "Failed Task",
                             isIcon: true,
-                            iconData: Icons.run_circle,
+                            iconData: Icons.sms_failed,
                             onPress: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const TotalTaskList(
+                                      builder: (context) => const FailedTaskList(
                                             status: "In Progress",
                                           )
                                       //InProgressTaskListScreen()

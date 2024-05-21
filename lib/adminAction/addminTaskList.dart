@@ -1,20 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:srr_management/Screens/Leave/component/approvalPopUp.dart';
 import 'package:srr_management/Screens/task/createTask.dart';
-import 'package:srr_management/Screens/task/editTask.dart';
 import 'package:srr_management/Screens/task/model/userModel.dart';
 import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/colors.dart';
 import 'package:srr_management/theme/style.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class AdminTaskList extends StatefulWidget {
   const AdminTaskList({Key? key}) : super(key: key);
@@ -29,7 +27,9 @@ class _AdminTaskListState extends State<AdminTaskList>
   bool isLoading = false;
   bool leaveResposed = false;
   late TabController controller;
+  // ignore: unused_field
   double _rating = 0.0;
+  // ignore: unused_field
   TextEditingController _reviewController = TextEditingController();
 
   String _selectedCategory = 'Logistic';
@@ -121,6 +121,7 @@ class _AdminTaskListState extends State<AdminTaskList>
       'id': id.toString()
     });
     print(res.statusCode);
+    print(res.body);
     if (res.statusCode == 200) {
       print(res.body);
 
@@ -152,18 +153,19 @@ class _AdminTaskListState extends State<AdminTaskList>
     TextEditingController _reviewController = TextEditingController();
 
     showModalBottomSheet(
+      // isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.all(20.0),
+          child: ListView(
+            // mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Add Review',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               RatingBar.builder(
                 initialRating: _rating,
                 minRating: 1,
@@ -171,8 +173,8 @@ class _AdminTaskListState extends State<AdminTaskList>
                 allowHalfRating: true,
                 itemCount: 5,
                 itemSize: 40.0,
-                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                itemBuilder: (context, _) => Icon(
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => const Icon(
                   Icons.star,
                   color: Colors.amber,
                 ),
@@ -180,17 +182,28 @@ class _AdminTaskListState extends State<AdminTaskList>
                   _rating = rating;
                 },
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               TextFormField(
                 controller: _reviewController,
                 maxLines: 5,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Write your review here...',
                   border: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  // Elevation
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                  ),
+                  padding: EdgeInsets.all(16), // Button padding
+                  textStyle: TextStyle(
+                    fontSize: 16, // Text size
+                    fontWeight: FontWeight.bold, // Text weight
+                  ),
+                ),
                 onPressed: () {
                   // Handle submission of rating and review
                   print('Rating: $_rating');
@@ -203,7 +216,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                   // Here you can implement logic to submit the rating and review
                   Navigator.pop(context); // Close the bottom sheet
                 },
-                child: Text('Submit'),
+                child: const Text('Submit'),
               ),
             ],
           ),
@@ -230,6 +243,7 @@ class _AdminTaskListState extends State<AdminTaskList>
       print(res.body);
 
       var data = jsonDecode(res.body);
+      print(data.toString());
 
       // getAllTaskData();
     }
@@ -239,6 +253,7 @@ class _AdminTaskListState extends State<AdminTaskList>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Total TaskList'),
       ),
@@ -268,7 +283,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                               style: kBoldStyle(),
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   vertical: 5.0, horizontal: 10.0),
                               child: Container(
                                 height: 55,
@@ -283,25 +298,28 @@ class _AdminTaskListState extends State<AdminTaskList>
                                   child: ButtonTheme(
                                     alignedDropdown: true,
                                     child: DropdownButton(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      value: _selectedCategory != ''
-                                          ? _selectedCategory
-                                          : null,
-                                      hint: Text('State'),
-                                      items: <String>[
-                                        'Logistic',
-                                        'Office',
-                                        'Admin',
-                                        'Tender'
-                                      ].map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(value,style:kHeaderStyle(),),
-                                        );
-                                      }).toList(),
-                                      onChanged:_onCategoryChanged
-                                    ),
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        value: _selectedCategory != ''
+                                            ? _selectedCategory
+                                            : null,
+                                        hint: const Text('State'),
+                                        items: <String>[
+                                          'Logistic',
+                                          'Office',
+                                          'Admin',
+                                          'Tender'
+                                        ].map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(
+                                              value,
+                                              style: kHeaderStyle(),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: _onCategoryChanged),
                                   ),
                                 ),
                               ),
@@ -396,6 +414,7 @@ class _AdminTaskListState extends State<AdminTaskList>
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
+                                              //Text(data[index]['id'].toString()),
                                               //  Text(selectedUsers[0].name),
                                               // for (var index = 0;
                                               //     index < selectedUsers.length;
@@ -617,7 +636,8 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                           style: ElevatedButton
                                                               .styleFrom(
                                                             backgroundColor:
-                                                                Color.fromARGB(
+                                                                const Color
+                                                                    .fromARGB(
                                                                     255,
                                                                     230,
                                                                     191,
@@ -640,7 +660,8 @@ class _AdminTaskListState extends State<AdminTaskList>
                                                                 data[index][
                                                                     'user_ids']);
                                                           },
-                                                          child: Text("Review"))
+                                                          child: const Text(
+                                                              "Review"))
                                                       : Container(),
                                                 ],
                                               )

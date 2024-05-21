@@ -45,7 +45,7 @@ class _EditProfileState extends State<EditProfile> {
   File? _image;
   // var image;
 
-void _imgFromGallery() async {
+  void _imgFromGallery() async {
     var pickedImage = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = File(pickedImage!.path);
@@ -94,8 +94,7 @@ void _imgFromGallery() async {
 
   void getUserData() async {
     setState(() {
-      isLoading=true;
-      
+      isLoading = true;
     });
     String url = APIData.userDetails;
     print(url);
@@ -111,10 +110,19 @@ void _imgFromGallery() async {
       name.text = '${data['user']['name']}';
       email.text = '${data['user']['email']}';
       mobile.text = data['user']['phone_no'] ?? '';
+      genderValue = data['user']['gender'] == 'female'
+          ? "Female"
+          : data['user']['gender'] == 'male'
+              ? "Male"
+              : "Other";
+      maritalValue = data['user']['marital_status'] == 'married'
+          ? "Married"
+          : "Unmarried";
+         presentAddress.text=data['user']['present_address'];
+         dateOfBirth.text=data['user']['dob'];
     }
-       setState(() {
-      isLoading=false;
-      
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -143,13 +151,15 @@ void _imgFromGallery() async {
       'dob': dateOfBirth.text,
       'gender': genderValue,
       'marital_status': maritalValue,
-      'address': presentAddress.text
+      'present_address': presentAddress.text
     });
     print(res.statusCode);
     if (res.statusCode == 200) {
       print(res.body);
       var data = jsonDecode(res.body);
       print(data.toString());
+       toastMessage(message: 'Profile Updated');
+      Navigator.pop(context);
       // setState(() {
       //   isLoading = false;
       // });
@@ -172,7 +182,7 @@ void _imgFromGallery() async {
       'dob': dateOfBirth.text,
       'gender': genderValue,
       'marital_status': maritalValue,
-      'address': presentAddress.text
+      'present_address': presentAddress.text
     };
     String url = APIData.updateUser;
     print(url);

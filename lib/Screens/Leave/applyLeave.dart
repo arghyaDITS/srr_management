@@ -71,7 +71,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
     var res = await http.post(Uri.parse(url), headers: APIData.kHeader, body: {
       'user_id': ServiceManager.userID,
       'leave_type': _leaveType,
-      'total_days': _numberOfDays.toString(),
+      'total_days': _calculateDifference(),
       'from_date': _fromDate.toString(),
       'to_date': _toDate.toString(),
       'leave_desc': _leaveDescriptionController.text
@@ -97,7 +97,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
       'id': widget.leaveId.toString(),
       'user_id': ServiceManager.userID,
       'leave_type': _leaveType,
-      'total_days': _numberOfDays.toString(),
+      'total_days': _calculateDifference().toString(),
       'from_date': _fromDate.toString(),
       'to_date': _toDate.toString(),
       'leave_desc': _leaveDescriptionController.text
@@ -112,7 +112,12 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
     }
     return 'Success';
   }
-
+String _calculateDifference() {
+    final difference = _toDate.difference(_fromDate);
+    final days = difference.inDays;
+    final hours = difference.inHours.remainder(24);
+    return '${days+1}'; //and $hours hours';
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,6 +207,9 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
                                 setState(() {
                                   _toDate = selectedDate;
                                 });
+                                if (_fromDate!=null  && _toDate != null) {
+                                _calculateDifference();
+                              }
                               }
                             },
                             child: InputDecorator(
@@ -217,25 +225,30 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
                       ],
                     ),
                     const SizedBox(height: 16.0),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: totalDays,
-                      onChanged: (value) {
-                        setState(() {
-                          _numberOfDays = int.tryParse(value) ?? 0;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Number of Days',
-                      ),
-                    ),
+                     (_fromDate!=null  && _toDate != null)
+                            ? Text(
+                                'Duration: ${_calculateDifference()} days',
+                                style: const TextStyle(fontSize: 16),
+                              )
+                            : Container(),
+                    // TextFormField(
+                    //   keyboardType: TextInputType.number,
+                    //   controller: totalDays,
+                    //   onChanged: (value) {
+                    //     setState(() {
+                    //       _numberOfDays = int.tryParse(value) ?? 0;
+                    //     });
+                    //   },
+                    //   decoration: const InputDecoration(
+                    //     labelText: 'Number of Days',
+                    //   ),
+                    // ),
                     const SizedBox(height: 32.0),
                     Center(
                       child: isLoading == false
                           ? ElevatedButton(
                               onPressed: () {
-                                if (_leaveDescriptionController.text.isEmpty ||
-                                    _numberOfDays <= 0) {
+                                if (_leaveDescriptionController.text.isEmpty ) {
                                   // Show error message or toast indicating required fields
                                   toastMessage(
                                       message: 'Please fill all fields');

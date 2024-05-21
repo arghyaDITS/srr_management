@@ -8,8 +8,11 @@ import 'package:srr_management/Screens/profile/editProfile.dart';
 import 'package:srr_management/Screens/profile/leaveReport.dart';
 import 'package:srr_management/Screens/profile/myDocument.dart';
 import 'package:srr_management/Screens/profile/salaryStateMent.dart';
+import 'package:srr_management/Screens/profile/task_report.dart';
 import 'package:srr_management/Screens/profile/termsAndService.dart';
+import 'package:srr_management/adminAction/userListScreen.dart';
 import 'package:srr_management/components/buttons.dart';
+import 'package:srr_management/components/util.dart';
 import 'package:srr_management/services/apiEndpoint.dart';
 import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/colors.dart';
@@ -64,7 +67,9 @@ class _ProfileViewState extends State<ProfileView> {
   void initState() {
     super.initState();
     // ServiceManager().getNotificationTime();
+    isLoading=true;
    ServiceManager().getUserData();
+   isLoading=false;
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.minScrollExtent) {
@@ -113,8 +118,9 @@ class _ProfileViewState extends State<ProfileView> {
       decoration: kBackgroundDesign(context),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SingleChildScrollView(
+        body:  isLoading ==true ? Center(child: LoadingIcon(),): SingleChildScrollView(
           controller: _scrollController,
+          
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
@@ -207,11 +213,11 @@ class _ProfileViewState extends State<ProfileView> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LeaveReportScreen()));
+                              builder: (context) =>ServiceManager.roleAs=='user'? LeaveReportScreen(userId:  ServiceManager.userID):UserListScreen()));
                     }),
-                    // profileButton(Icons.receipt_long_outlined, 'Notification', (){
-                    //   Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage()));
-                    // }),
+                    profileButton(Icons.receipt_long_outlined, 'Task Report', (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => TaskReportScreen()));
+                    }),
                   ],
                 ),
               ),

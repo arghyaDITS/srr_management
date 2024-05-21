@@ -18,6 +18,7 @@ import 'package:srr_management/services/serViceManager.dart';
 import 'package:srr_management/theme/colors.dart';
 import 'package:srr_management/theme/style.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
   int? taskId;
@@ -203,18 +204,23 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 
   Future<void> downloadAndOpenPDF(docUrl) async {
-    final String url = docUrl; // Sample PDF URL
+    print("1");
+    final String url = docUrl; 
     final response = await http.get(Uri.parse(url));
+    print(response.statusCode);
 
     if (response.statusCode == 200) {
       final Directory appDocDir = await getApplicationDocumentsDirectory();
       final String appDocPath = appDocDir.path;
       final File file = File('$appDocPath/example.pdf');
       await file.writeAsBytes(response.bodyBytes);
+      print("2");
 
       // Open the downloaded PDF file using the default PDF viewer
       try {
+        print("3");
         await OpenFile.open('$appDocPath/example.pdf');
+        print("4");
       } catch (e) {
         print('Error opening PDF: $e');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -231,6 +237,24 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         ),
       );
     }
+  }
+  //
+   void downloadFile(String url) {
+    FileDownloader.downloadFile(
+      url: url,
+      onDownloadCompleted: (String path) {
+        print('File downloaded to: $path');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File downloaded to: $path')),
+        );
+      },
+      onDownloadError: (String error) {
+        print('Error downloading file: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error downloading file: $error')),
+        );
+      },
+    );
   }
 
   @override
@@ -515,7 +539,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             data['document'] != null
                                 ? GestureDetector(
                                     onTap: () {
-                                      downloadAndOpenPDF(data['document']);
+                                        downloadFile(data['document']);
+                                      //downloadAndOpenPDF(data['document']);
                                     },
                                     child: const Row(
                                       children: [

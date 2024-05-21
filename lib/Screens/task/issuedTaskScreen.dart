@@ -22,6 +22,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
   @override
   void initState() {
     super.initState();
+    print(widget.isAdmin.toString());
     widget.isAdmin==true? getIssueList():getUserIssueList();
   }
 
@@ -32,7 +33,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
     _streamController.close();
   }
 
-  void _unflagTask(BuildContext context, taskId) {
+  void _unflagTask(BuildContext context, issueId) {
     showDialog(
       context: context,
       builder: (context) {
@@ -48,7 +49,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
             ),
             TextButton(
               onPressed: () {
-                resolveIssue(taskId);
+                resolveIssue(issueId);
                 Navigator.pop(context);
               },
               child: const Text('Yes'),
@@ -60,6 +61,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
   }
 
   getIssueList() async {
+    print("AdminIssueList");
     setState(() {
       isLoading = true;
     });
@@ -91,6 +93,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
     return 'Success';
   }
   getUserIssueList() async {
+    print("userIssueList");
     setState(() {
       isLoading = true;
     });
@@ -122,11 +125,11 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
     return 'Success';
   }
 
-  resolveIssue(taskId) async {
+  resolveIssue(issueId) async {
     setState(() {
       isLoading = true;
     });
-    String url = "${APIData.fixIssue}/$taskId";
+    String url = "${APIData.fixIssue}/$issueId";
     print(url);
     var res = await http.get(
       Uri.parse(url),
@@ -140,6 +143,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
       print(res.body);
       var data = jsonDecode(res.body);
       print(data.toString());
+       widget.isAdmin==true? getIssueList():getUserIssueList();
       setState(() {
         isLoading = false;
       });
@@ -225,7 +229,7 @@ class _IssuedTaskScreenState extends State<IssuedTaskScreen> {
                             IconButton(
                               icon: const Icon(color: Colors.red, Icons.flag),
                               onPressed: () {
-                                _unflagTask(context, data[index]['task_id']);
+                                _unflagTask(context, data[index]['id']);
                               },
                             ),
                           ],
